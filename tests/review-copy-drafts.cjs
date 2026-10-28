@@ -1,0 +1,11 @@
+/* eslint-disable @typescript-eslint/no-require-imports -- isolated TypeScript fixtures */
+const fs=require('node:fs'),ts=require('typescript'),vm=require('node:vm'),assert=require('node:assert/strict');const m={exports:{}};vm.runInNewContext(`(function(exports){${ts.transpileModule(fs.readFileSync('lib/review-copy-drafts.ts','utf8'),{compilerOptions:{module:ts.ModuleKind.CommonJS,target:ts.ScriptTarget.ES2022}}).outputText}})`)(m.exports);
+const{editCopyDraft,previewCopyDrafts,saveCopyDraft}=m.exports;
+const p={product:{name:'사과'},sections:[{id:'hero',title:'기존 제목',body:'기존 본문',kicker:'기존 서브',reviewed:true,format:{title:{fontSize:45}},elements:[{id:'e1',type:'text',text:'기존 추가 문구'}]},{id:'other',title:'다른 섹션',body:'유지',elements:[]}]},original=JSON.stringify(p);
+let drafts=editCopyDraft(p,[],'hero','title','수정한 제목');drafts=editCopyDraft(p,drafts,'hero','body','수정한 본문');let preview=previewCopyDrafts(p,drafts);assert.equal(preview.sections[0].title,'수정한 제목');assert.equal(preview.sections[0].reviewed,false);assert.equal(JSON.stringify(p),original);
+const saved=saveCopyDraft(p,drafts.find(d=>d.target==='title'));assert.equal(saved.sections[0].title,'수정한 제목');assert.equal(saved.sections[0].body,'기존 본문');assert.equal(saved.sections[0].format.title.fontSize,45);assert.equal(saved.sections[1].title,'다른 섹션');
+drafts=drafts.filter(d=>d.target!=='title');preview=previewCopyDrafts(saved,drafts);assert.equal(preview.sections[0].body,'수정한 본문');assert.equal(previewCopyDrafts(saved,[]).sections[0].body,'기존 본문');
+drafts=editCopyDraft(p,[],'hero','title','새 제목');drafts=editCopyDraft(p,drafts,'hero','title','기존 제목');assert.equal(drafts.length,0);
+drafts=editCopyDraft(p,[],'hero','extra:e1','추가 카피');assert.equal(saveCopyDraft(p,drafts[0]).sections[0].elements[0].text,'추가 카피');assert.throws(()=>saveCopyDraft({...p,sections:[{...p.sections[0],elements:[]}]},drafts[0]));
+drafts=editCopyDraft(p,[],'hero','body','신규 본문');assert.throws(()=>saveCopyDraft({...p,sections:[{...p.sections[0],body:'외부 수정 내용'}]},drafts[0]));assert.throws(()=>editCopyDraft(p,[],'hero','title','가'.repeat(151)));
+console.log('PASS: live drafts do not persist, selective save/cancel, multiple fields, exact original return, extra text, length/concurrent edit guards.');

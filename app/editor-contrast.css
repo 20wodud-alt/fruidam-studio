@@ -1,0 +1,54 @@
+/* Black interface copy; green controls and selection accents. Canvas artwork
+   keeps its editable per-element colors. Placeholder text stays subdued. */
+.outline-studio {
+  --editor-ink: #111111;
+  --editor-accent: #426c4c;
+  color: var(--editor-ink);
+}
+.outline-studio :is(.os-pages,.os-inspector,.os-workspace-toolbar,.os-element-toolbar,.os-tool-rail,.os-section-tools,.os-zoom)
+  :is(p,label,span,small,strong,code,input,select,textarea,button,a):not(:where(.product-page *)),
+.outline-studio :is(.os-inspector-heading,.os-property-title,.tl-group-title,.ep-heading,.ep-color,.tl-page-height) {
+  color: var(--editor-ink);
+}
+.outline-studio :is(.os-pages,.os-inspector,.os-workspace-toolbar,.os-element-toolbar,.os-tool-rail,.os-section-tools,.os-zoom) svg {
+  color: var(--editor-accent);
+}
+.outline-studio :is(.os-inspector-footer>button,.composer-send),
+.outline-studio :is(.os-inspector-footer>button,.composer-send) svg,
+.outline-studio :is(.tl-image-grid button>span,.tl-badge-grid>button>span),
+.outline-studio .tl-image-grid button>span svg {
+  color: #ffffff;
+}
+.outline-studio .composer-mic.active,
+.outline-studio .composer-mic.active svg {
+  color: #ffffff;
+}
+.outline-studio .composer-mic.active {background: var(--editor-accent)}
+.outline-studio .os-voice-composer.listening {border-color: var(--editor-accent);box-shadow:0 0 0 2px #426c4c10}
+.outline-studio .voice-wave i {background: var(--editor-accent)}
+.outline-studio input[type="range"],.outline-studio input[type="checkbox"] {
+  accent-color: var(--editor-accent);
+}
+.outline-studio .os-voice-composer textarea::placeholder {
+  color: #b8beb5;
+  opacity: 1;
+}
+.studio-header :is(.header-project,.profile-name,.profile-name small,.local-badge,.save-indicator,.ai-connect-button) {
+  color: #111111;
+}
+.studio-header :is(.save-indicator,.ai-connect-button) svg {color:#426c4c}
+@keyframes micPulse{0%,100%{box-shadow:0 0 0 0 #426c4c25}50%{box-shadow:0 0 0 6px #426c4c0b}}
+
+/* Give larger interface labels room without scaling the editable artwork. */
+.os-workspace-toolbar {height:auto;min-height:46px;flex-wrap:wrap;padding-block:6px}
+.os-element-toolbar {height:auto;min-height:38px;flex-wrap:wrap;row-gap:6px}
+.os-property-title {flex-wrap:wrap;gap:6px}
+.os-property-title>small {line-height:1.5}
+.os-tool-rail>button>span {line-height:1.5}
+.os-inspector-heading {min-height:49px}
+.os-inspector-tabs>button {min-height:44px}
+.os-field>textarea,.os-voice-composer textarea {line-height:1.8}
+@media(min-width:1201px){.outline-studio{grid-template-columns:64px 264px minmax(0,1fr) 330px}}
+@media(max-width:760px){.os-tool-rail>button>span{font-size:10px}.os-workspace-toolbar{gap:5px}.os-toolbar-caption{display:none}}
+@media(max-width:850px){.studio-header .avatar{display:none}.studio-header .header-left{flex:1;min-width:0}.studio-header .header-right{flex-shrink:0}}
+@media(max-width:640px){.studio-header{padding-inline:10px}.studio-header .header-right{gap:6px}.studio-header .save-indicator{font-size:11px;gap:3px}}

@@ -1,0 +1,18 @@
+.market-export-settings{padding:0;margin:0 0 20px;border:0;min-width:0;color:#111}
+.market-export-settings legend{font-size:14px;font-weight:600;margin-bottom:12px;padding:0}
+.market-export-platforms{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.market-export-platforms>button{border:1px solid #e0e5dd;border-radius:8px;padding:14px;justify-content:space-between;gap:7px;text-align:left;background:#fff;color:#111;min-height:74px}
+.market-export-platforms>button.selected{border-color:#426c4c;background:#f5f9f2;box-shadow:inset 0 0 0 1px #426c4c}
+.market-export-platforms strong{font-size:15px;font-weight:600;display:block}
+.market-export-platforms small{display:block;font-size:13px;margin-top:7px;color:#555}
+.market-export-platforms svg{color:#426c4c}
+.market-export-format{display:flex;align-items:center;justify-content:space-between;gap:14px;margin-top:16px;font-size:14px}
+.market-export-format select{border:1px solid #dce3d7;border-radius:6px;padding:10px 12px;min-height:42px;max-width:70%;background:#fff;color:#111;font-size:14px}
+.market-export-spec{background:#f8faf6;border:1px solid #e1e8dc;padding:15px;border-radius:8px;margin-bottom:20px;color:#111;line-height:1.8}
+.market-export-spec strong{font-size:14px}
+.market-export-spec p{font-size:13px;margin:9px 0}
+.market-export-spec small{font-size:12px;color:#555;display:block}
+.market-export-spec a{font-size:12px;color:#315d3c;display:inline-block;margin-top:9px;text-underline-offset:3px}
+.market-export-spec+.download-options strong{font-size:16px;color:#111}
+.market-export-spec+.download-options small{font-size:13px;line-height:1.8;color:#555}
+@media(max-width:480px){.market-export-platforms{gap:8px}.market-export-platforms>button{padding:12px 10px}.market-export-platforms strong{font-size:14px}.market-export-platforms small{font-size:12px}.market-export-format{font-size:13px}}
