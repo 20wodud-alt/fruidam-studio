@@ -1,8 +1,10 @@
 import { NextResponse } from "next/server";
 import { normalizeGeminiModel, readAISettings, validateGeminiKey } from "@/lib/ai-settings";
 import { verifyGeminiConnection } from "@/lib/gemini-client";
+import { currentMember } from "@/lib/commerce-auth";
 export const runtime = "nodejs";
 export async function POST(request: Request) {
+  const member=await currentMember();if(member&&member.role!=="admin")return NextResponse.json({error:"연결 확인은 운영자가 진행합니다."},{status:403});
   try {
     const origin = request.headers.get("origin");
     if (origin && new URL(origin).host !== request.headers.get("host")) return NextResponse.json({error:"설정 화면에서 요청해주세요."},{status:403});

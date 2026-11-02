@@ -6,10 +6,12 @@ import { readAISettings } from "@/lib/ai-settings";
 import { storageProvider } from "@/lib/supabase-storage";
 import { studioAccess } from "@/lib/studio-store";
 import type { GenerationEvent } from "@/lib/generation-progress";
+import { currentMember } from "@/lib/commerce-auth";
 export const runtime="nodejs";
 export const maxDuration=120;
 export async function POST(request:Request){
   const origin=request.headers.get("origin");if(origin && new URL(origin).host!==request.headers.get("host"))return Response.json({error:"앱에서 요청해주세요."},{status:403});
+  const member=await currentMember();if(member&&member.role!=="admin")return Response.json({error:"공급상품 목록에서 상품을 선택해 상세페이지를 시작해주세요."},{status:403});
   let input;try{input=await request.json();}catch{return Response.json({error:"상품 요청 형식을 확인해주세요."},{status:400});}
   let info:ReturnType<typeof product>;
   try{info=product(input.product);}catch(e){return Response.json({error:e instanceof Error?e.message:"상품 정보를 확인해주세요."},{status:400});}

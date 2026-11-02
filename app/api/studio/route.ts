@@ -8,6 +8,7 @@ import { studioAccess } from "@/lib/studio-store";
 import { storageProvider, StudioStorageError } from "@/lib/supabase-storage";
 import { generateSections, normalizeSectionLength, sectionNames, type Section } from "@/lib/studio";
 import { validateElements, validateSectionFormat } from "@/lib/validate-element-style";
+import { currentMember } from "@/lib/commerce-auth";
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
 export async function GET() {
@@ -18,6 +19,7 @@ export async function POST(request: Request) {
   try {
     const origin = request.headers.get("origin"); if (origin && new URL(origin).host !== request.headers.get("host")) return NextResponse.json({ error: "Invalid origin" }, { status: 403 });
     const input = await request.json();
+    const member=await currentMember();if(member&&member.role!=="admin"&&["create","duplicate"].includes(input.action))return NextResponse.json({error:"공급상품 목록에서 상세페이지를 시작해주세요."},{status:403});
     const initialProduct = input.action === "create" ? product(input.product) : null;
     const generated = initialProduct ? await composeCopy(initialProduct, generateSections(initialProduct)) : null;
     const projects = await studioAccess(projects => {
