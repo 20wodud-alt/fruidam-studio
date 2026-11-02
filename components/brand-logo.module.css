@@ -1,0 +1,28 @@
+.logo {
+  position: relative;
+  display: inline-block;
+  flex-shrink: 0;
+  width: 128px;
+  aspect-ratio: 1311 / 641;
+  overflow: hidden;
+  vertical-align: middle;
+}
+
+/* Display the artwork bounds while retaining the original transparent PNG. */
+.image {
+  position: absolute;
+  display: block;
+  left: -18.4592%;
+  top: -24.025%;
+  width: 135.3166%;
+  height: 138.3775%;
+  max-width: none;
+  object-fit: fill;
+}
+
+.compact { width: 102px; }
+
+@media (max-width: 600px) {
+  .logo { width: 104px; }
+  .compact { width: 92px; }
+}

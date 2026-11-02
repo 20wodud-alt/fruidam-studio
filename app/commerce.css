@@ -13,3 +13,7 @@
 .fd-dashboard-banner>img{mix-blend-mode:normal;object-fit:cover;aspect-ratio:1;box-shadow:0 8px 20px #263d1720}
 .fd-auth-story>img{object-fit:cover;aspect-ratio:1}
 @media(max-width:600px){.fd-grow-visual{min-height:260px}.fd-dashboard-banner>img{opacity:.8}}
+
+/* Keep the original FRUIDAM artwork aligned in every service header. */
+.fd-header{padding-top:12px;padding-bottom:12px}
+@media(max-width:600px){.fd-header{padding-top:10px;padding-bottom:10px}}
