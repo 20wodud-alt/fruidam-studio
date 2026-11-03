@@ -18,9 +18,9 @@
 | 저장소 | https://github.com/20wodud-alt/fruidam-studio |
 | 작업 브랜치 | `codex/fruidam-seller-platform` |
 | 검토용 PR | https://github.com/20wodud-alt/fruidam-studio/pull/1 |
-| 최근 기능 코드 커밋 | `9da3b57` — 연동 특징 입력은 등록 원문만 사용 |
-| 최근 운영 배포 | `dpl_4SQz78B54fZDLLJpHsPr6anoboZe` |
-| 배포 고유 주소 | https://fruidam-studio-f62w0xbv0-20wodud.vercel.app |
+| 최근 기능 코드 커밋 | `bbec945` — 과일 후킹·핵심 포인트와 원본·AI 혼합 구성, 수정 전 비공개 백업 |
+| 최근 운영 배포 | `dpl_CQv9AsKpeAXbNZBuCNUvU7bZhQfY` |
+| 배포 고유 주소 | https://fruidam-studio-d2k3nwoow-20wodud.vercel.app |
 | 배포 상태 | 2026-11-03 Vercel에서 Production / Ready 확인 |
 
 작업 브랜치의 코드로 CLI에서 직접 배포했다. main 병합과 Git 자동 배포 연결은 별도 작업이다. 문서 저장·커밋·푸시는 운영 사이트 재배포와 구분한다.
