@@ -1,13 +1,14 @@
 "use client";
 import { useState } from "react";
 import { Check, Clock3, LoaderCircle } from "lucide-react";
+import Link from "next/link";
 import type { Member } from "@/lib/commerce";
 
 export function SupplierMemberCard({ member, busy, act }: { member:Member; busy:boolean; act:(payload:Record<string,unknown>,message?:string)=>Promise<boolean|undefined> }){
   const [saved,setSaved]=useState(false),[saving,setSaving]=useState(false);
   const saveComplete=saved&&member.approved;
   return <article className="fd-panel fd-supplier-member-card">
-    <div className="fd-between"><div><h3>{member.name}</h3><p>{member.email}</p>{member.awaitingSignup&&<small className="fd-caption">이 이메일로 가입·인증하면 입점 계정이 연결됩니다.</small>}</div>
+    <div className="fd-between"><div><h3>{member.name}</h3><p>{member.email}</p>{member.awaitingSignup&&<><small className="fd-caption">이 이메일로 가입·인증하면 입점 계정이 연결됩니다.</small><Link className="fd-text-link fd-account-setup-link" href={`/account/setup?email=${encodeURIComponent(member.email)}&name=${encodeURIComponent(member.name)}`}>비밀번호 설정하기 →</Link></>}</div>
       <div className="fd-supplier-status-actions"><span className={`fd-status fd-supplier-approval ${member.approved?"is-approved":"is-pending"}`} role="status" aria-live="polite">{member.approved?<Check size={12}/>:<Clock3 size={12}/>} {member.approved?"입점 승인":"승인 대기"}</span>{member.approved&&<button type="button" className="fd-revoke-supplier" disabled={busy} aria-label={`${member.name} 입점 승인 취소`} onClick={()=>{if(window.confirm(`${member.name}의 입점 승인을 취소할까요? 신규 상품 등록·발주가 중단되고 판매 중인 상품이 중단됩니다. 기존 주문과 정산 내역은 유지됩니다.`))void act({action:"revokeSupplierApproval",id:member.id},"입점 승인을 취소했습니다.");}}>입점 승인 취소</button>}</div>
     </div>
     <form className="fd-inline-form" onSubmit={async event=>{event.preventDefault();if(busy||saving)return;const fields=new FormData(event.currentTarget);setSaved(false);setSaving(true);try{const success=await act({action:"approveSupplier",id:member.id,commission:Math.round(Number(fields.get("commission"))*100)},"공급처와 수수료율을 저장했습니다.");setSaved(success===true);}finally{setSaving(false);}}}>

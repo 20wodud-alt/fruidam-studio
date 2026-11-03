@@ -8,17 +8,18 @@ import { BrandLogo } from "@/components/brand-logo";
 import { SupplyProductForm as SupplierForm } from "@/components/supply-product-form";
 import { SupplyProductDetails } from "@/components/supply-product-details";
 import { SupplierMemberCard } from "@/components/supplier-member-card";
+import { SupplierAccountSetup } from "@/components/supplier-account-setup";
 import { SupplierReviewContact } from "@/components/supplier-review-contact";
 import { ServiceHeader } from "@/components/service-header";
 import { BrandStory } from "@/components/brand-story";
 import "@/app/commerce.css";
 
-type View="home"|"about"|"catalog"|"pricing"|"seller"|"supplier"|"admin"|"login";
+type View="home"|"about"|"catalog"|"pricing"|"seller"|"supplier"|"admin"|"login"|"account-setup";
 type Data={member:Member|null;products:SupplyProduct[];members:Member[];orders:SupplyOrder[];claims:Claim[];notices:Notice[];purchases:Purchase[];paymentReady:boolean;operatorEmail?:string};
 const empty:Data={member:null,products:[],members:[],orders:[],claims:[],notices:[],purchases:[],paymentReady:false};
 const roleName={seller:"셀러",supplier:"공급처",admin:"운영자"};
 const destination=(member:Member)=>member.role==="supplier"?"/supplier":member.role==="admin"?"/admin":"/seller";
-export function CommerceApp({view}:{view:View}){
+export function CommerceApp({view,accountSetup}:{view:View;accountSetup?:{email:string;name:string}}){
   const [data,setData]=useState<Data>(empty),[loading,setLoading]=useState(true),[error,setError]=useState(""),[busy,setBusy]=useState(false),[toast,setToast]=useState(""),[selected,setSelected]=useState<SupplyProduct|null>(null),[tab,setTab]=useState("overview"),[query,setQuery]=useState(""),[category,setCategory]=useState("전체"),[notices,setNotices]=useState(false),[modal,setModal]=useState<"product"|"claim"|null>(null),[claimOrder,setClaimOrder]=useState<SupplyOrder|null>(null);
   const member=data.member;
   const importRef=useRef<HTMLInputElement>(null);
@@ -43,6 +44,7 @@ export function CommerceApp({view}:{view:View}){
     {notices&&<aside className="fd-notices"><div className="fd-between"><h3>알림</h3><button className="fd-icon" onClick={()=>setNotices(false)} aria-label="알림 닫기"><X size={18}/></button></div>{data.notices.length?data.notices.map(n=><article key={n.id}><strong>{n.title}</strong><p>{n.body}</p><small>{new Date(n.createdAt).toLocaleString("ko-KR")}</small></article>):<p>새로운 알림이 없습니다.</p>}</aside>}
     {error&&<div className="fd-alert" role="alert"><CircleHelp size={18}/><span>{error}</span><button onClick={()=>setError("")} aria-label="오류 닫기"><X size={16}/></button></div>}
     {view==="about"&&<BrandStory/>}
+    {view==="account-setup"&&<SupplierAccountSetup email={accountSetup?.email||""} name={accountSetup?.name||""}/>}
     {view==="home"&&<main>
       <section className="fd-hero fd-container"><div className="fd-hero-copy"><span className="fd-eyebrow"><i/> FROM FARM TO YOUR BUSINESS</span><h1>좋은 과일을 만나,<br/>나의 판매를 <em>시작하다.</em></h1><p>과일을 고르고, 상세페이지를 만들고, 판매하세요.<br/>포장과 배송은 산지 직매장이 함께합니다.</p><div className="fd-hero-buttons"><a className="fd-button" href="/catalog">판매할 과일 찾아보기 <ArrowRight size={18}/></a><a className="fd-button outline" href="/login?mode=signup">3일 무료 체험 <Sparkles size={17}/></a></div><div className="fd-hero-note"><Check size={15}/> 재고를 쌓아두지 않는 위탁판매 <span/> <Check size={15}/> 배송비 포함 공급가</div></div><div className="fd-hero-art"><div className="fd-hero-orbit"/><span className="fd-art-label">A FRESH START<br/>FOR YOUR BUSINESS</span><img className="fd-art-apple" src="/photos/fruit-apple.webp" alt="물방울이 맺힌 신선한 사과 사진"/><img className="fd-art-citrus" src="/photos/fruit-citrus.webp" alt="수확한 감귤 실사 사진"/><img className="fd-art-grape" src="/photos/fruit-grape.webp" alt="싱그러운 청포도 실사 사진"/><div className="fd-art-card"><div className="fd-art-check"><Check size={18}/></div><span><strong>상품의 이야기가 판매로</strong><small>상세페이지부터 산지 직배송까지</small></span></div><span className="fd-art-stamp">GROWN WITH CARE<br/><Sprout size={29}/> SHARED WITH YOU</span></div></section>
       <section className="fd-benefit-strip"><div className="fd-container"><span><Leaf/> 승인된 산지 공급처</span><span><FileImage/> 내 상품에 맞는 상세페이지</span><span><Truck/> 공급처에서 바로 배송</span><span><ShieldCheck/> 주문부터 정산까지 한곳에서</span></div></section>
