@@ -18,9 +18,9 @@
 | 저장소 | https://github.com/20wodud-alt/fruidam-studio |
 | 작업 브랜치 | `codex/fruidam-seller-platform` |
 | 검토용 PR | https://github.com/20wodud-alt/fruidam-studio/pull/1 |
-| 최근 기능 코드 커밋 | `371d240` — 홈·스튜디오 공통 상단 메뉴와 동일 위치 적용 |
-| 최근 운영 배포 | `dpl_C27LZ8P6aP6T3rEwysKsaDZv8uns` |
-| 배포 고유 주소 | https://fruidam-studio-dx1hb37za-20wodud.vercel.app |
+| 최근 기능 코드 커밋 | `03544cd` — 상단 무료로 시작하기 버튼 홈 한정 |
+| 최근 운영 배포 | `dpl_4N1YfRsBhmyFWpTMZS33XDtGcmcq` |
+| 배포 고유 주소 | https://fruidam-studio-a5msc1004-20wodud.vercel.app |
 | 배포 상태 | 2026-11-03 Vercel에서 Production / Ready 확인 |
 
 작업 브랜치의 코드로 CLI에서 직접 배포했다. main 병합과 Git 자동 배포 연결은 별도 작업이다. 문서 저장·커밋·푸시는 운영 사이트 재배포와 구분한다.
@@ -58,6 +58,7 @@
 - 헤더·푸터·스튜디오의 기존 로고 통일. 스튜디오 로고는 편집 내용 저장 후 홈으로 이동.
 - 로고는 이전 크기의 70%로 표시. 상세페이지 스튜디오 링크를 포함한 서비스 상단 메뉴와 스튜디오 작업 헤더는 스크롤 시 고정된다. 모바일 펼침 메뉴는 고정 헤더 하단에 이어진다.
 - 홈과 스튜디오가 동일한 `ServiceHeader`를 사용한다. 안내 띠·로고·메뉴 위치를 통일하고 스튜디오 작업 도구는 그 아래에 배치한다. 메뉴 이동 시 수정 중인 프로젝트를 먼저 저장하며 편집 영역과 모바일 메뉴 높이를 조정했다.
+- 상단 ‘무료로 시작하기’ 버튼은 비회원의 홈에서만 표시하며 다른 페이지에서는 숨긴다. 로그인·회원 공간 버튼은 유지한다.
 
 ## 남은 작업
 
