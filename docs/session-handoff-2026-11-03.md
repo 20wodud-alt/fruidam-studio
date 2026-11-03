@@ -261,3 +261,5 @@
 - Gemini 미연결 시 기본 과일 카피를 적용하고 연결 필요를 안내한다. 실제 생성 성공으로 표시하지 않는다. API 실패 시 기존 작업은 유지한다.
 - 검증: 프로덕션 빌드·타입 검사, fruit-composition 모의 Gemini 검사, 실제 Auth 임시 계정 통합 검사(타인 구성 접근 차단 포함), 브라우저 모의 응답으로 구성 버튼 1회·이미지 3회·저장·실행 취소 확인. 실제 AI·이메일·결제 호출 없음.
 - 통합 검사 서버: `$env:FRUIDAM_AI_FIXTURE='1'` 설정 후 `node -r ./tests/mock-gemini.cjs ./node_modules/next/dist/bin/next start --hostname 127.0.0.1 --port 3010`, 별도 터미널에서 `node tests/commerce-integration.mjs`. 모의 서버 표식이 없으면 검사를 시작하지 않는다. 운영 배포에는 이 설정을 추가하지 않는다.
+
+- 기존 구성안 문구를 다시 작성하기 전에는 계정 접근을 확인한 저장 원본을 별도 JSON으로 백업한다. 로컬은 `data/backups/{projectId}`, 운영은 비공개 자산 버킷 `backups/{projectId}`를 사용하며 사진 목록이나 공개 API로 노출하지 않는다. 백업 실패 시 기존 구성안을 변경하지 않는다.

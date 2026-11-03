@@ -12,7 +12,7 @@ function cloud(kind: "asset" | "settings") {
   return mode === "supabase" || Boolean(process.env.VERCEL);
 }
 function objectPath(key: string) {
-  if (!assetPattern.test(key) && !/^history\/[a-z0-9-]{1,100}\/[a-f0-9-]+\.webp\.json$/i.test(key) && !/^settings\/(ai|nongsaro)-settings\.json$/.test(key)) throw new Error("파일 저장 경로를 확인해주세요.");
+  if (!assetPattern.test(key) && !/^backups\/[a-z0-9-]{1,100}\/[a-f0-9-]+\.json$/i.test(key) && !/^history\/[a-z0-9-]{1,100}\/[a-f0-9-]+\.webp\.json$/i.test(key) && !/^settings\/(ai|nongsaro)-settings\.json$/.test(key)) throw new Error("파일 저장 경로를 확인해주세요.");
   return key.split("/").map(encodeURIComponent).join("/");
 }
 async function storageRequest(endpoint: string, init: RequestInit = {}) {
@@ -79,5 +79,15 @@ export async function writeSettingFile(name: SettingFile, value: unknown): Promi
   else {
     const directory = path.join(process.cwd(), "data"); await fs.mkdir(directory, { recursive: true });
     const temp = path.join(directory, `${name}.${randomUUID()}.tmp`); await fs.writeFile(temp, bytes, { mode: 0o600 }); await fs.rename(temp, path.join(directory, name));
+  }
+}
+
+export async function backupStudioProject(project:import("./studio").StudioProject):Promise<void>{
+  if(!/^[a-z0-9-]{1,100}$/i.test(project.id))throw new Error("백업할 작업 ID를 확인해주세요.");
+  const filename=`${randomUUID()}.json`,bytes=Buffer.from(JSON.stringify(project));
+  if(cloud("asset"))await writeObject(`backups/${project.id}/${filename}`,bytes,"application/json");
+  else{
+    const directory=path.join(process.cwd(),"data","backups",project.id);
+    await fs.mkdir(directory,{recursive:true});await fs.writeFile(path.join(directory,filename),bytes,{mode:0o600,flag:"wx"});
   }
 }

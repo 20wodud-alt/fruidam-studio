@@ -3,6 +3,8 @@
 import assert from "node:assert/strict";
 import { randomUUID } from "node:crypto";
 import { createRequire } from "node:module";
+import { promises as fs } from "node:fs";
+import path from "node:path";
 process.loadEnvFile(".env.local");
 const require=createRequire(import.meta.url),sharp=require("sharp");
 const origin=process.env.FRUIDAM_TEST_ORIGIN||"http://127.0.0.1:3010";
@@ -52,6 +54,11 @@ try{
   const foreign=await api(supplier.cookie,"/api/studio");assert.equal(foreign.data.length,0,"projects isolated by account");
   assert.equal((await api(supplier.cookie,"/api/studio/compose",{projectId:created.data.projectId})).status,404,"other member cannot compose a foreign project");
   const composed=await api(seller.cookie,"/api/studio/compose",{projectId:created.data.projectId});assert.equal(composed.status,200);
+  const backupRows=await remote("/storage/v1/object/list/fruidam-assets",{prefix:`backups/${created.data.projectId}/`,limit:100});
+  let backedUp;
+  if(backupRows.length)backedUp=await remote(`/storage/v1/object/authenticated/fruidam-assets/backups/${created.data.projectId}/${backupRows[0].name}`);
+  else{const directory=path.resolve("data/backups",created.data.projectId),files=await fs.readdir(directory);backedUp=JSON.parse(await fs.readFile(path.join(directory,files[0]),"utf8"));}
+  assert.deepEqual(backedUp.sections,own.data[0].sections,"private backup preserves the saved original before rewrite");
   assert.equal(composed.data.project.supplyProductId,product.id);assert.equal(composed.data.project.product.features,product.features);assert.deepEqual(composed.data.project.product.images,assets);assert.equal(composed.data.project.product.design.photoDirection.mode,"mixed");assert.deepEqual(composed.data.project.sections.map(s=>s.id),own.data[0].sections.map(s=>s.id));assert.equal(composed.data.project.sections[0].image,own.data[0].sections[0].image,"recompose preserves the original hero photo");assert.ok(composed.data.project.sections.every(s=>s.imageDirection),"every section retains its image art direction");
   assert.equal((await api(seller.cookie,"/api/commerce/export",{projectId:created.data.projectId,mode:"check"})).status,403,"trial cannot download");
   assert.equal((await api(supplier.cookie,"/api/commerce/export",{projectId:created.data.projectId,mode:"check"})).status,403,"other account cannot export");
@@ -97,6 +104,15 @@ try{
   await stateUpdate(s=>{for(const m of s.members.filter(m=>ids.has(m.id)))for(const id of m.projects)projects.add(id);s.members=s.members.filter(m=>!ids.has(m.id));s.products=s.products.filter(p=>!ids.has(p.supplierId));s.orders=s.orders.filter(o=>!ids.has(o.sellerId)&&!ids.has(o.supplierId));s.claims=s.claims.filter(c=>!ids.has(c.sellerId)&&!ids.has(c.supplierId));s.notices=s.notices.filter(n=>!ids.has(n.memberId));s.purchases=s.purchases.filter(p=>!ids.has(p.memberId));for(const id of projects){delete s.projectProducts[id];delete s.downloads[id];delete s.imageUsage[id];}});
   const all=await remote("/rest/v1/rpc/FRUIDAM_load_projects",{});const deletions=all.filter(row=>projects.has(row.project.id)).map(row=>({id:row.project.id,expected_revision:row.revision}));if(deletions.length)await remote("/rest/v1/rpc/FRUIDAM_apply_changes",{changes:[],deletions});
   if(assets.length)await remote("/storage/v1/object/fruidam-assets",{prefixes:assets.map(url=>url.split("/").at(-1))},"DELETE");
+  for(const id of projects){
+    if(!/^[a-f0-9-]{36}$/.test(id))throw Error("Unsafe fixture backup ID.");
+    const prefix=`backups/${id}/`,rows=await remote("/storage/v1/object/list/fruidam-assets",{prefix,limit:100});
+    const prefixes=rows.filter(row=>/^[a-f0-9-]+\.json$/.test(row.name)).map(row=>prefix+row.name);
+    if(prefixes.length)await remote("/storage/v1/object/fruidam-assets",{prefixes},"DELETE");
+    const root=path.resolve("data/backups"),directory=path.resolve(root,id);
+    if(!directory.startsWith(root+path.sep))throw Error("Unsafe fixture backup path.");
+    await fs.rm(directory,{recursive:true,force:true});
+  }
   for(const id of users)await remote(`/auth/v1/admin/users/${id}`,undefined,"DELETE");
   console.log("Disposable integration accounts and records cleaned up.");
 }
