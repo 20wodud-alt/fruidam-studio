@@ -4,6 +4,7 @@ import { useState } from "react";
 import { ArrowUp, Check, ImagePlus, LoaderCircle, Plus, X } from "lucide-react";
 import { optionName, supplyImages, type Member, type SupplyOption, type SupplyProduct } from "@/lib/commerce";
 import { prepareImageUpload } from "@/lib/client-upload";
+import { OriginPicker } from "@/components/origin-picker";
 
 type Props={product:SupplyProduct|null;busy:boolean;serverError?:string;suppliers?:Member[];defaultSupplierId?:string;onSubmit:(payload:Record<string,unknown>)=>Promise<void>};
 export function SupplyProductForm({product,busy,onSubmit,serverError,suppliers,defaultSupplierId}:Props){
@@ -25,7 +26,8 @@ export function SupplyProductForm({product,busy,onSubmit,serverError,suppliers,d
       {suppliers&&<label>공급처<select name="supplierId" defaultValue={product?.supplierId||defaultSupplierId} required>{suppliers.map(m=><option key={m.id} value={m.id}>{m.role==="admin"?`${m.name} · 운영자 직접 관리`:m.name}</option>)}</select><small>직접 관리하거나 승인된 농가·직매장을 선택하세요.</small></label>}
       <label>상품명<input name="name" required maxLength={100} defaultValue={product?.name} placeholder="예: 정품 부사 사과"/></label>
       <div className="fd-form-row"><label>상품 분류<select name="category" defaultValue={product?.category}>{["사과·배","감귤·만감류","포도·기타"].map(c=><option key={c}>{c}</option>)}</select></label><label>상품 태그<input name="badge" maxLength={60} defaultValue={product?.badge} placeholder="예: 국내과일"/></label></div>
-      <div className="fd-form-row"><label>원산지<input name="origin" required maxLength={100} defaultValue={product?.origin} placeholder="예: 국내산 · 경북 청송"/></label><label>품종<input name="variety" maxLength={100} defaultValue={product?.variety} placeholder="예: 부사"/></label></div>
+      <OriginPicker initialOrigin={product?.origin}/>
+      <label>품종<input name="variety" maxLength={100} defaultValue={product?.variety} placeholder="예: 부사"/></label>
       <label>상품 특징·안내<textarea name="features" required rows={4} maxLength={3000} defaultValue={product?.features} placeholder="실제 상품의 특징과 구성, 셀러에게 안내할 내용을 입력하세요."/></label>
     </fieldset>
     <fieldset disabled={busy}><legend>상품 사진 <span>{images.length}/10장</span></legend>
