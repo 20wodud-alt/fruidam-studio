@@ -11,7 +11,10 @@ import { supplyDetails } from "@/lib/commerce-product-details";
 import { supplyForProject, supplyProjectProduct, supplyProjectId } from "@/lib/supply-project";
 import { product as validateProduct } from "@/lib/validate-product";
 import { revokeSupplierApproval } from "@/lib/commerce-members";
+import { composeCopy } from "@/lib/ai-copywriter";
+import { fruitCompositionRequest } from "@/lib/fruit-composition";
 export const runtime="nodejs";
+export const maxDuration=120;
 export const dynamic="force-dynamic";
 const text=(value:unknown,max=200)=> typeof value==="string"?value.trim().slice(0,max):"";
 function number(value:unknown,min:number,max:number){const n=Number(value);if(!Number.isSafeInteger(n)||n<min||n>max)throw new CommerceError("금액·수량을 확인해주세요.");return n;}
@@ -38,7 +41,8 @@ export async function POST(request:Request){
       if(!reserved&&fresh.role==="seller"&&!subscribed(fresh)&&fresh.credits<1&&(fresh.trialProject||Date.now()-new Date(fresh.createdAt).getTime()>3*86400000))throw new CommerceError("무료 체험이 종료됐습니다. 이용권을 선택해주세요.",403);
       let info:Product;
       try{info=input.product===undefined?supplyProjectProduct(supply):validateProduct(input.product);}catch(error){throw new CommerceError(error instanceof Error?error.message:"상품 정보를 확인해주세요.");}
-      const project:StudioProject={id,product:info,sections:generateSections(info),starred:false,createdAt:new Date().toISOString(),updatedAt:new Date().toISOString(),supplyProductId:supply.id};
+      const generated=await composeCopy(info,generateSections(info),fruitCompositionRequest,false);
+      const project:StudioProject={id,product:info,sections:generated.sections,copyReport:generated.report,starred:false,createdAt:new Date().toISOString(),updatedAt:new Date().toISOString(),supplyProductId:supply.id};
       await commerceAccess(s=>{
         const actor=s.members.find(m=>m.id===member.id)!;supplyForProject(s,actor,supply.id);
         if(actor.projects.includes(id)){if(s.projectProducts[id]!==supply.id)throw new CommerceError("다른 작업과 요청이 겹칩니다. 다시 시작해주세요.",409);return;}

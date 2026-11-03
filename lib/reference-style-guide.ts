@@ -7,7 +7,7 @@ export const fruitEditorialPhotoGuide = "Editorial visual grammar: natural side 
 
 export function applyFruitEditorialStyle(sections: Section[]): Section[] {
   const labels: Record<Section["kind"], string> = {hero:"FRUIDAM SELECT",story:"FRUIT STORY",detail:"Check Point",benefits:"Check Point",options:"Option & Size",faq:"Q & A",shipping:"INFO"};
-  return sections.map(section => ({
+  return sections.map((section,index) => ({
     ...section,
     presentation: "fruit-editorial",
     kicker: section.kicker ?? labels[section.kind],
@@ -16,6 +16,7 @@ export function applyFruitEditorialStyle(sections: Section[]): Section[] {
       title: {font:"sans",weight:700,fontSize:section.kind==="hero"?64:46,lineHeight:1.3,color:"#20251f",...section.format?.title},
       body: {font:"sans",fontSize:19,lineHeight:1.6,color:"#62685f",...section.format?.body},
       background: section.format?.background || "#ffffff",
+      image: {width:section.kind==="detail"&&index%2?88:100,height:section.kind==="hero"?680:section.kind==="story"?480:600,fit:"cover",position:"center",...section.format?.image},
     },
   }));
 }

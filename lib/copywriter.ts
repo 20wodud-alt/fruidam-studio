@@ -1,5 +1,7 @@
 import {applyCopyRhythm} from "./copy-rhythm";
 import type { Product, Section } from "./studio";
+import { fruitReferenceContext } from "./fruit-reference";
+import { writeFruitCopy } from "./fruit-composition";
 export const researchReferences = [
   { title: "쿠팡 한라봉 공개 상품 정보", url: "https://www.coupang.com/np/search?q=%ED%95%9C%EB%9D%BC%EB%B4%89" },
   { title: "쿠팡 나주 배 상품 정보", url: "https://www.coupang.com/vp/products/6209270439" },
@@ -9,6 +11,7 @@ export function reviewInsights(reviews = "") {
   return rules.filter(([, regex]) => regex.test(reviews)).map(([name]) => name);
 }
 export function writeLocalCopy(product: Product, sections: Section[]): Section[] {
+  if(fruitReferenceContext(product))return applyCopyRhythm(writeFruitCopy(product,sections));
   const features = product.features.split("\n").map(s => s.replace(/^\s*[-•\d.)]+\s*/, "").trim()).filter(Boolean);
   const name = product.name;
   const feature = (i: number) => features[i % Math.max(1, features.length)] || `${name}의 특징을 사진과 함께 꼼꼼하게 살펴보세요.`;

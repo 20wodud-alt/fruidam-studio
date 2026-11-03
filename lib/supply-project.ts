@@ -22,5 +22,5 @@ export function supplyForProject(state:CommerceState,member:Member,id:string):Su
 }
 
 export function supplyProjectProduct(supply:SupplyProduct):Product{
-  return {name:supply.name,category:"식품 · 농수산물",features:supply.features.slice(0,3000),price:"",options:supply.options.map(optionName).join("\n").slice(0,2000),images:supplyImages(supply),theme:"forest",length:"15",design:{...structuredClone(emptyDesignBrief),photoDirection:{mode:"original",people:false,instructions:"실제 상품 외관을 유지합니다."}}};
+  return {name:supply.name,category:"식품 · 농수산물",features:supply.features.slice(0,3000),price:"",options:supply.options.map(optionName).join("\n").slice(0,2000),images:supplyImages(supply),theme:"forest",length:"15",design:{...structuredClone(emptyDesignBrief),photoDirection:{mode:"mixed",people:false,instructions:"대표·옵션은 실제 상품 사진 유지. 과육 접사, 사선 원물 정물, 탑뷰 식탁 등 서로 다른 구도를 섹션 내용에 맞춰 연출합니다. 실제 상품 외관과 품종을 유지합니다."}}};
 }

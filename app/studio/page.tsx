@@ -151,7 +151,7 @@ export default function Studio() {
     try{
       let created:StudioProject|null=null;
       if(sourceProductId){
-        setGenerationStages([{id:"product",label:"상품 정보",detail:"불러온 상품 정보로 페이지를 구성하고 있어요.",state:"running"}]);
+        setGenerationStages([{id:"product",label:"상품 정보",detail:"상품 특징을 다듬고 후킹 문구와 섹션별 이미지 방향을 작성하고 있어요.",state:"running"}]);
         const response=await fetch("/api/commerce",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({action:"createProject",productId:sourceProductId,product:form,requestId:generationId.current})});
         const data=await response.json();if(!response.ok)throw new Error(data.error||"구성안을 만들지 못했습니다.");
         created=data.project;setGenerationStages([{id:"product",label:"상품 정보",detail:"상품 정보와 사진을 준비했어요.",state:"complete"},{id:"save",label:"작업 저장",detail:"작업을 안전하게 저장했어요.",state:"complete"}]);
@@ -166,7 +166,7 @@ export default function Studio() {
       if(!created)throw new Error("작성 완료 정보를 확인하지 못했어요. 다시 시도해주세요.");
       const project=created as StudioProject;if(sourceProductId){window.history.replaceState(null,"",`/studio?project=${encodeURIComponent(project.id)}`);setSourceProductId("");setSourceProductName("");}setProjects(projects=>[project,...projects.filter(p=>p.id!==project.id)]);openProject(project);setScreen("generating");
       if(project.product.design?.photoDirection?.mode!=="original"){
-        setGenerationStages(stages=>[...stages,{id:"images",label:"사진 연출",detail:"상품 원본을 참고해 산지·모델컷을 준비해요.",state:"running"}]);await generateImages({},project);
+        setGenerationStages(stages=>[...stages,{id:"images",label:"사진 연출",detail:"상품 원본을 참고해 과육 접사·식탁 연출컷을 준비해요.",state:"running"}]);await generateImages({},project);
       }
       generationId.current="";setScreen("outline");setToast("상품 이야기와 구성안을 준비했어요.");window.scrollTo({top:0});
     }catch(e){setGenerationError(e instanceof Error?e.message:"구성안을 만들지 못했어요.");}
@@ -174,7 +174,7 @@ export default function Studio() {
   }
   async function generateImages(request:ImageRequest={},initial?:StudioProject) {
     const base=initial || latestDraft.current;if(!base || imageLock.current)return;
-    const jobs=request.sectionId ? [{sectionId:request.sectionId,scene:request.scene || "lifestyle" as const}] : buildImagePlan(base.product,base.sections);
+    const jobs=request.sectionId ? [{sectionId:request.sectionId,scene:request.scene || "lifestyle" as const}] : buildImagePlan(base.product,base.sections).slice(0,base.supplyProductId?3:4);
     if(!jobs.length){setToast("생성할 사진가 없어요. 사진 도구에서 선택 페이지를 다시 생성할 수 있어요.");return;}
     imageLock.current=true;imageStop.current=false;let done=0;
     setImageProgress({busy:true,done:0,total:jobs.length,label:"원본을 참고해 사진을 준비하고 있어요",error:""});
@@ -290,7 +290,7 @@ export default function Studio() {
 
     {screen === "generating" && <GenerationLoading name={form.name} stages={generationStages} error={generationError} imageProgress={imageProgress} onBack={()=>{generationId.current="";setGenerationError("");setScreen("form");}} onRetry={()=>void generate()}/> }
     {screen !== "generating" && imageProgress && <div className="image-generation-progress" role="status"><div><Sparkles size={15}/><strong>{imageProgress.label}</strong><span>{imageProgress.done}/{imageProgress.total}</span>{imageProgress.busy ? <button onClick={()=>{imageStop.current=true;}}>남은 생성 중지</button> : <button aria-label="사진 생성 상태 닫기" onClick={()=>setImageProgress(null)}><X size={13}/></button>}</div>{imageProgress.error && <p>{imageProgress.error}<button onClick={()=>void generateImages()}>비어 있는 연출컷 다시 생성</button></p>}{imageProgress.busy && <small>대표·옵션 원본 유지 · 사진당 수십 초가 걸릴 수 있어요</small>}</div>}
-    {screen === "outline" && draft && <OutlineStudio imageGenerating={Boolean(imageProgress?.busy)} onGenerateImages={request=>generateImages(request)} project={draft} selectedId={selectedId} onSelect={setSelectedId} onChange={changeDraft} onAdd={() => setModal("add")} onUpload={target => chooseUpload("section", target)} onPasteImage={(files, target) => { imageTarget.current = "section"; sectionElementTarget.current = target.startsWith("extra:") ? target : "image"; void upload(files); }} onSave={() => void save(draft).catch(() => {})} onExport={() => setModal("download")} uploading={uploading} onReview={() => void navigate("review")} onBack={() => void navigate("home")} onEditBrief={() => setModal("brief")} onHelp={() => setModal("help")} onAISettings={() => setModal("ai")} saveState={saveState} />}
+    {screen === "outline" && draft && <OutlineStudio onCompose={async current=>{await save(current);const response=await fetch("/api/studio/compose",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({projectId:current.id})});const data=await response.json();if(!response.ok)throw new Error(data.error||"구성안을 다듬지 못했어요.");return data.project;}} imageGenerating={Boolean(imageProgress?.busy)} onGenerateImages={request=>generateImages(request)} project={draft} selectedId={selectedId} onSelect={setSelectedId} onChange={changeDraft} onAdd={() => setModal("add")} onUpload={target => chooseUpload("section", target)} onPasteImage={(files, target) => { imageTarget.current = "section"; sectionElementTarget.current = target.startsWith("extra:") ? target : "image"; void upload(files); }} onSave={() => void save(draft).catch(() => {})} onExport={() => setModal("download")} uploading={uploading} onReview={() => void navigate("review")} onBack={() => void navigate("home")} onEditBrief={() => setModal("brief")} onHelp={() => setModal("help")} onAISettings={() => setModal("ai")} saveState={saveState} />}
 
     {screen === "review" && draft && <CopyReviewPage project={draft} onChange={changeDraft} onBack={() => void navigate("outline")} onContinue={() => void navigate("editor")}><Steps step={3} /></CopyReviewPage>}
 
