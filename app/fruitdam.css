@@ -63,6 +63,7 @@ body,
 body { background-attachment: initial; }
 .studio-app { min-height: 100dvh; }
 .studio-header, .home-sidebar { backdrop-filter: none; }
+.studio-header { position: sticky; top: 0; }
 .brand { padding: 2px 0; min-width: 132px; flex-shrink: 0; }
 .brand-logo { display: block; width: 132px; height: 54px; object-fit: contain; transform: scale(1.16); transform-origin: left center; }
 .welcome-banner { color: #777; border-bottom: 1px solid var(--border); }

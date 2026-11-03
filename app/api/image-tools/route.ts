@@ -3,6 +3,7 @@ import { promises as fs } from "node:fs";
 import path from "node:path";
 import { randomUUID } from "node:crypto";
 import sharp from "sharp";
+import { sampleImageFile } from "@/lib/sample-photos";
 
 export const runtime = "nodejs";
 
@@ -13,9 +14,9 @@ export async function POST(request: Request) {
     const input = await request.json();
     if (typeof input.image !== "string" || !["crop", "sharpen", "background"].includes(input.action)) throw new Error("input");
     const filename = /^\/api\/uploads\/([a-f0-9-]+\.webp)$/.exec(input.image)?.[1];
-    const sample = input.image === "/sample-product.svg";
+    const sample = sampleImageFile(input.image);
     if (!filename && !sample) return Response.json({ error: "내 컴퓨터에 업로드한 이미지를 선택해주세요." }, { status: 400 });
-    const source = sample ? await fs.readFile(path.join(process.cwd(), "public", "sample-product.svg")) : await readAsset(filename!);
+    const source = sample ? await fs.readFile(path.join(process.cwd(), "public", sample)) : await readAsset(filename!);
     const base = sharp(source, { limitInputPixels: 40_000_000 }).rotate();
     let output: Buffer;
     if (input.action === "crop") {

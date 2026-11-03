@@ -17,8 +17,8 @@ import "./market-export.css";
 import "./review-comparison.css";
 
 export const metadata: Metadata = {
-  title: "열매담 스튜디오 — 상품의 이야기를 한 장의 페이지로",
-  description: "상품 정보와 사진으로 구성안을 만들고, 섹션을 편집해 완성하는 로컬 상세페이지 스튜디오.",
+  title: "열매담 FRUIDAM — 좋은 과일을 만나, 나의 판매를 시작하다",
+  description: "과일 상세페이지 제작부터 산지 직매장 위탁 공급과 발주·배송 관리까지. 농가와 셀러의 시작을 연결하는 열매담.",
 };
 
 export default function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {

@@ -37,7 +37,7 @@ export function DetailPage({ project, selected, onSelect, selectedElement, selec
   }
   function image(section: Section) {
     const attributes = target(section, "image");
-    return section.image ? <><img {...attributes} className={`dp-image ${attributes.className || ""}`} style={photoCSS(section.format?.image)} src={section.image} alt={section.title || product.name} />{!section.imageMeta && section.image.startsWith("/sample-") && !section.format?.image?.hidden && <figcaption>샘플 상품 일러스트 · 실제 상품 사진으로 교체해주세요</figcaption>}</> : <div {...attributes} className={`dp-no-image ${attributes.className || ""}`} style={photoCSS(section.format?.image)}>상품 사진을 추가해주세요</div>;
+    return section.image ? <><img {...attributes} className={`dp-image ${attributes.className || ""}`} style={photoCSS(section.format?.image)} src={section.image} alt={section.title || product.name} />{project.supplyProductId && section.imageMeta && !section.format?.image?.hidden && <figcaption>AI 연출 이미지 · 실제 상품 사진을 함께 확인해주세요</figcaption>}{!section.imageMeta && (section.image.startsWith("/sample-") || section.image.startsWith("/fruit-") || section.image.startsWith("/photos/fruit-")) && !section.format?.image?.hidden && <figcaption>샘플 과일 사진 · 판매 상품 사진으로 교체해주세요</figcaption>}</> : <div {...attributes} className={`dp-no-image ${attributes.className || ""}`} style={photoCSS(section.format?.image)}>상품 사진을 추가해주세요</div>;
   }
   function extras(section: Section) {
     if (!section.elements?.length) return null;

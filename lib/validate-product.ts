@@ -1,7 +1,8 @@
 import { emptyDesignBrief, normalizeSectionLength, themes, type DesignBrief, type Product } from "./studio";
 import { normalizeCoupangReferences } from "./fruit-reference";
+import { sampleImageFile } from "./sample-photos";
 export function image(value: unknown): string {
-  if (typeof value !== "string" || !(/^\/api\/uploads\/[a-f0-9-]+\.webp$/.test(value) || ["/sample-product.svg", "/sample-detail.svg", ""].includes(value))) throw new Error("올바른 상품 이미지를 선택해주세요.");
+  if (typeof value !== "string" || !(/^\/api\/uploads\/[a-f0-9-]+\.webp$/.test(value) || value === "" || sampleImageFile(value))) throw new Error("올바른 상품 이미지를 선택해주세요.");
   return value;
 }
 export function text(value: unknown, limit: number) { if (typeof value !== "string" || value.length > limit) throw new Error("입력 내용이 올바르지 않거나 너무 길어요."); return value.trim(); }
