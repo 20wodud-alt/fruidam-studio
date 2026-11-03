@@ -8,6 +8,7 @@ import { emptyDesignBrief, generateSections, type Product, type StudioProject } 
 import { createPendingOrder } from "@/lib/commerce-orders";
 import { supplyDetails } from "@/lib/commerce-product-details";
 import { optionName, supplyImages } from "@/lib/commerce";
+import { revokeSupplierApproval } from "@/lib/commerce-members";
 export const runtime="nodejs";
 export const dynamic="force-dynamic";
 const text=(value:unknown,max=200)=> typeof value==="string"?value.trim().slice(0,max):"";
@@ -59,9 +60,12 @@ export async function POST(request:Request){
       }else if(input.action==="approveSupplier"){
         if(actor.role!=="admin")throw new CommerceError("운영자만 처리할 수 있습니다.",403);
         const target=s.members.find(m=>m.id===input.id&&m.role==="supplier");if(!target)throw new CommerceError("공급처를 찾지 못했습니다.");target.approved=true;target.commission=number(input.commission,0,10000);notice(s,target.id,"입점 승인 완료","상품을 등록하고 검수를 요청할 수 있습니다.");
+      }else if(input.action==="revokeSupplierApproval"){
+        revokeSupplierApproval(s,actor.id,text(input.id));
       }else if(input.action==="approveProduct"||input.action==="pauseProduct"){
         const target=s.products.find(p=>p.id===input.id);if(!target)throw new CommerceError("상품을 찾지 못했습니다.");
         if(actor.role!=="admin" && !(input.action==="pauseProduct"&&actor.id===target.supplierId))throw new CommerceError("처리 권한이 없습니다.",403);
+        if(input.action==="approveProduct"){const supplier=s.members.find(m=>m.id===target.supplierId);if(!supplier||(supplier.role!=="admin"&&!(supplier.role==="supplier"&&supplier.approved)))throw new CommerceError("입점 승인된 공급처의 상품만 승인할 수 있습니다.");}
         if(input.action==="approveProduct"&&!target.image)throw new CommerceError("실제 상품 사진을 등록한 후 승인해주세요.");
         target.status=input.action==="approveProduct"?"approved":"paused";
         notice(s,target.supplierId,target.status==="approved"?"상품 승인 완료":"상품 판매 중단",target.name);

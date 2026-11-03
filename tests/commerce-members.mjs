@@ -1,0 +1,26 @@
+import assert from "node:assert/strict";
+import { readFileSync } from "node:fs";
+import { createRequire } from "node:module";
+import vm from "node:vm";
+const require=createRequire(import.meta.url),ts=require("typescript");
+class CommerceError extends Error { constructor(message,status=400){super(message);this.status=status;} }
+const module={exports:{}};
+vm.runInNewContext(ts.transpileModule(readFileSync("lib/commerce-members.ts","utf8"),{compilerOptions:{module:ts.ModuleKind.CommonJS,target:ts.ScriptTarget.ES2022}}).outputText,{module,exports:module.exports,require:name=>name==="./commerce-store"?{CommerceError}:require(name)});
+const {registerCommerceMember,revokeSupplierApproval}=module.exports;
+const fixture=()=>({members:[{id:"admin",role:"admin"},{id:"reserved",name:"Farm",email:"supplier@example.invalid",role:"supplier",approved:true,awaitingSignup:true,commission:1000,projects:[],unlocked:[],credits:0}],products:[{id:"product",supplierId:"reserved",status:"approved"},{id:"draft",supplierId:"reserved",status:"pending"}],orders:[{id:"order",supplierId:"reserved",status:"delivered",amount:33000,settledAt:"2026-11-01"}],claims:[{supplierId:"reserved"}],notices:[{memberId:"reserved",title:"old"}]});
+const verified={id:"auth-supplier",email:"supplier@example.invalid",email_confirmed_at:"2026-11-03",created_at:"2026-11-03",user_metadata:{name:"Ignored",role:"admin"}};
+let state=fixture();const before=JSON.stringify(state);
+assert.throws(()=>registerCommerceMember(state,{...verified,email_confirmed_at:undefined}),error=>error.status===403);
+assert.equal(JSON.stringify(state),before,"unverified email cannot claim or mutate supplier assets");
+const member=registerCommerceMember(state,verified);
+assert.equal(member.role,"supplier");assert.equal(member.name,"Farm");assert.equal(member.awaitingSignup,undefined);assert.equal(state.members.length,2);
+assert.equal(state.products[0].supplierId,verified.id);assert.equal(state.orders[0].supplierId,verified.id);assert.equal(state.claims[0].supplierId,verified.id);assert.equal(state.notices[0].memberId,verified.id);
+assert.equal(registerCommerceMember(state,verified),member,"repeated login does not duplicate or rename business");
+const unrelated=registerCommerceMember(state,{...verified,id:"unrelated",email:"other@example.invalid"});assert.equal(unrelated.role,"seller","signup metadata cannot grant admin");
+assert.throws(()=>revokeSupplierApproval(state,verified.id,verified.id),error=>error.status===403);
+const existingOrders=JSON.stringify(state.orders);
+revokeSupplierApproval(state,"admin",verified.id);
+assert.equal(member.approved,false);assert.equal(state.products[0].status,"paused");assert.equal(state.products[1].status,"pending");assert.equal(JSON.stringify(state.orders),existingOrders,"orders and settlement records survive revocation");
+const count=state.notices.length;revokeSupplierApproval(state,"admin",verified.id);assert.equal(state.notices.length,count,"revocation is idempotent");
+assert.throws(()=>revokeSupplierApproval(state,"admin","admin"),error=>error.status===404);
+console.log("PASS: verified supplier enrollment, ownership preservation, role restrictions and approval revocation.");

@@ -3,6 +3,7 @@ import { NextResponse } from "next/server";
 import { supabaseStorageConfig } from "./supabase-storage";
 import { CommerceError, commerceAccess } from "./commerce-store";
 import type { Member } from "./commerce";
+import { registerCommerceMember } from "./commerce-members";
 
 export async function authRequest(endpoint: string, body?: unknown, token?: string) {
   const {url,key} = supabaseStorageConfig();
@@ -23,7 +24,7 @@ export async function currentMember(): Promise<Member | null> {
   const user = await authUser(); if (!user) return null;
   let state = await commerceAccess(); let member = state.members.find(m=>m.id===user.id);
   if (!member) {
-    state = await commerceAccess(s=>{ if(s.members.some(m=>m.id===user.id))return; s.members.push({id:user.id,email:user.email,name:(user.user_metadata?.name || user.email.split("@")[0]).slice(0,60),role:user.user_metadata?.role === "supplier" ? "supplier":"seller",createdAt:user.created_at,approved:false,commission:0,credits:0,unlocked:[],projects:[]}); });
+    state = await commerceAccess(s=>{registerCommerceMember(s,user);});
     member = state.members.find(m=>m.id===user.id);
   }
   const ownerEmail=process.env.FRUIDAM_OWNER_EMAIL?.trim().toLowerCase();

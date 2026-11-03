@@ -7,7 +7,7 @@ export const plans = [
   { id: "team" as const, name: "단체 플랜", price: 199000, count: 25, description: "5명이 함께하는 판매", unit: "부터 / 월" },
 ];
 export const won = (amount: number) => new Intl.NumberFormat("ko-KR").format(amount) + "원";
-export type Member = { id: string; email: string; name: string; role: Role; createdAt: string; approved: boolean; commission: number; plan?: PlanId; credits: number; periodEnd?: string; unlocked: string[]; projects: string[]; trialProject?: string; teamId?: string };
+export type Member = { id: string; email: string; name: string; role: Role; createdAt: string; approved: boolean; commission: number; plan?: PlanId; credits: number; periodEnd?: string; unlocked: string[]; projects: string[]; trialProject?: string; teamId?: string; awaitingSignup?:boolean };
 export type SupplyOption = { id: string; label: string; price: number; stock: number; grade?:string; weight?:string; size?:string; fruitCount?:string; customLabel?:boolean };
 export type SupplyProduct = { id: string; supplierId: string; supplier: string; name: string; category: string; origin: string; features: string; image: string; options: SupplyOption[]; cutoff: string; shipping: string; status: "pending" | "approved" | "paused"; updatedAt: string; demo?: boolean; images?:string[]; badge?:string; variety?:string; taxStatus?:"unspecified"|"tax_free"|"taxable"; dispatchType?:string; carrier?:string; productionYear?:number; storageType?:string; storageInstructions?:string; jejuSurcharge?:number; remoteSurcharge?:number; shippingLabel?:"included"|"free" };
 export function supplyImages(product:SupplyProduct){return [...new Set([product.image,...(product.images||[])].filter(Boolean))].slice(0,10);}
