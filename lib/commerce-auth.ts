@@ -4,12 +4,13 @@ import { supabaseStorageConfig } from "./supabase-storage";
 import { CommerceError, commerceAccess } from "./commerce-store";
 import type { Member } from "./commerce";
 import { registerCommerceMember } from "./commerce-members";
+import { authFailureDetails } from "./auth-errors";
 
 export async function authRequest(endpoint: string, body?: unknown, token?: string) {
   const {url,key} = supabaseStorageConfig();
   const response = await fetch(`${url}/auth/v1/${endpoint}`, {method: body === undefined ? "GET" : "POST", headers: {apikey:key, "Content-Type":"application/json", ...(token ? {Authorization:`Bearer ${token}`} : {})}, ...(body === undefined ? {} : {body:JSON.stringify(body)}), cache:"no-store", signal:AbortSignal.timeout(15000)});
   const data = await response.json().catch(() => ({}));
-  if (!response.ok) throw new CommerceError(response.status === 429 ? "요청이 많습니다. 잠시 후 다시 시도해주세요." : endpoint.startsWith("token") ? "이메일·비밀번호 또는 이메일 인증 여부를 확인해주세요." : "회원 인증 요청을 처리하지 못했습니다. 입력 정보와 이메일을 확인해주세요.", response.status === 429 ? 429 : 401);
+  if (!response.ok) {const failure=authFailureDetails(endpoint,response.status,data.error_code||data.code);throw new CommerceError(failure.message,failure.status,failure.code);}
   return data;
 }
 export async function authUser() {

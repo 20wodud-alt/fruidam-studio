@@ -3,6 +3,7 @@
 import { useState, type FormEvent } from "react";
 import Link from "next/link";
 import { ArrowRight, Check, KeyRound, LoaderCircle } from "lucide-react";
+import { ResendVerificationButton } from "@/components/resend-verification-button";
 
 export function SupplierAccountSetup({email,name}:{email:string;name:string}){
   const [busy,setBusy]=useState(false),[error,setError]=useState(""),[complete,setComplete]=useState(false),[verificationRequired,setVerificationRequired]=useState(true);
@@ -23,7 +24,7 @@ export function SupplierAccountSetup({email,name}:{email:string;name:string}){
   return <main className="fd-auth-page fd-account-setup">
     <div className="fd-auth-story"><span className="fd-eyebrow">YOUR FARM, YOUR ACCOUNT</span><h1>좋은 과일의 시작,<br/>나의 입점 계정으로.</h1><p>등록된 농가·직매장 정보와 상품을<br/>이메일 인증 후 연결합니다.</p><img src="/photos/fruit-citrus.webp" alt="햇살처럼 싱그러운 감귤"/></div>
     <section className="fd-auth-form"><KeyRound size={30}/><h2>입점 계정 비밀번호 설정</h2>
-      {complete?<div className="fd-account-setup-complete" role="status"><Check size={24}/><h3>계정 설정을 접수했습니다.</h3><p>{verificationRequired?"입력한 이메일로 받은 인증 링크를 확인한 뒤 로그인해주세요. 인증 후 기존 입점 정보와 상품이 연결됩니다.":"설정한 이메일과 새 비밀번호로 로그인하면 기존 입점 정보와 상품이 연결됩니다."}</p><Link href="/login" className="fd-button">로그인하기 <ArrowRight size={16}/></Link></div>:<><p>등록된 업체의 로그인 계정을 만드는 화면입니다.<br/>새 비밀번호를 두 번 입력해주세요.</p><form onSubmit={event=>void submit(event)}><fieldset disabled={busy} className="fd-account-setup-fields">
+      {complete?<div className="fd-account-setup-complete" role="status"><Check size={24}/><h3>{verificationRequired?"이메일 인증이 필요합니다.":"계정 설정을 접수했습니다."}</h3><p>{verificationRequired?"아직 로그인할 수 없습니다. 입력한 이메일의 받은편지함·스팸함에서 가장 최근 인증 링크를 누른 뒤 로그인해주세요. 인증 후 기존 입점 정보와 상품이 연결됩니다.":"설정한 이메일과 새 비밀번호로 로그인하면 기존 입점 정보와 상품이 연결됩니다."}</p>{verificationRequired&&<ResendVerificationButton email={email}/>}<Link href="/login" className="fd-button">{verificationRequired?"인증 후 로그인하기":"로그인하기"} <ArrowRight size={16}/></Link></div>:<><p>등록된 업체의 로그인 계정을 만드는 화면입니다.<br/>새 비밀번호를 두 번 입력해주세요.</p><form onSubmit={event=>void submit(event)}><fieldset disabled={busy} className="fd-account-setup-fields">
         <label>농가·직매장 이름<input name="name" required maxLength={60} autoComplete="organization" defaultValue={name} readOnly={!!name}/></label>
         <label>이메일<input name="email" type="email" required maxLength={254} autoComplete="email" defaultValue={email} readOnly={!!email}/></label>
         <label>새 비밀번호<input name="password" type="password" required minLength={10} maxLength={128} autoComplete="new-password" placeholder="10자 이상 입력해주세요"/></label>

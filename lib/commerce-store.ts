@@ -4,7 +4,7 @@ import { randomUUID } from "node:crypto";
 import { emptyCommerce, type CommerceState } from "./commerce";
 import { storageProvider, supabaseStorageConfig } from "./supabase-storage";
 
-export class CommerceError extends Error { constructor(message: string, public status = 400) { super(message); } }
+export class CommerceError extends Error { constructor(message: string, public status = 400, public code?:string) { super(message); } }
 const singleton = globalThis as typeof globalThis & { commerceQueue?: Promise<unknown> };
 async function rpc(name: string, body: unknown) {
   const {url,key} = supabaseStorageConfig();
