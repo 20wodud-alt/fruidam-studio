@@ -1,12 +1,13 @@
 "use client";
 /* eslint-disable @next/next/no-img-element */
 import { useEffect, useRef, useState, type FormEvent, type ReactNode } from "react";
-import { ArrowDown, ArrowRight, Bell, Check, ChevronRight, CircleHelp, ClipboardList, Download, FileImage, Leaf, LoaderCircle, LogOut, Menu, Package, Plus, Search, ShieldCheck, ShoppingBag, Sparkles, Sprout, Truck, Users, Wallet, X } from "lucide-react";
+import { ArrowDown, ArrowRight, Check, ChevronRight, CircleHelp, ClipboardList, Download, FileImage, Leaf, LoaderCircle, LogOut, Package, Plus, Search, ShieldCheck, ShoppingBag, Sparkles, Sprout, Truck, Users, Wallet, X } from "lucide-react";
 import { canOrder, orderLabels, plans, sampleProducts, subscribed, won, type Claim, type Member, type Notice, type Purchase, type SupplyOrder, type SupplyProduct } from "@/lib/commerce";
 import { prepareImageUpload } from "@/lib/client-upload";
 import { BrandLogo } from "@/components/brand-logo";
 import { SupplyProductForm as SupplierForm } from "@/components/supply-product-form";
 import { SupplyProductDetails } from "@/components/supply-product-details";
+import { ServiceHeader } from "@/components/service-header";
 import { BrandStory } from "@/components/brand-story";
 import "@/app/commerce.css";
 
@@ -16,7 +17,7 @@ const empty:Data={member:null,products:[],members:[],orders:[],claims:[],notices
 const roleName={seller:"셀러",supplier:"공급처",admin:"운영자"};
 const destination=(member:Member)=>member.role==="supplier"?"/supplier":member.role==="admin"?"/admin":"/seller";
 export function CommerceApp({view}:{view:View}){
-  const [data,setData]=useState<Data>(empty),[loading,setLoading]=useState(true),[error,setError]=useState(""),[busy,setBusy]=useState(false),[toast,setToast]=useState(""),[mobile,setMobile]=useState(false),[selected,setSelected]=useState<SupplyProduct|null>(null),[tab,setTab]=useState("overview"),[query,setQuery]=useState(""),[category,setCategory]=useState("전체"),[notices,setNotices]=useState(false),[modal,setModal]=useState<"product"|"claim"|null>(null),[claimOrder,setClaimOrder]=useState<SupplyOrder|null>(null);
+  const [data,setData]=useState<Data>(empty),[loading,setLoading]=useState(true),[error,setError]=useState(""),[busy,setBusy]=useState(false),[toast,setToast]=useState(""),[selected,setSelected]=useState<SupplyProduct|null>(null),[tab,setTab]=useState("overview"),[query,setQuery]=useState(""),[category,setCategory]=useState("전체"),[notices,setNotices]=useState(false),[modal,setModal]=useState<"product"|"claim"|null>(null),[claimOrder,setClaimOrder]=useState<SupplyOrder|null>(null);
   const member=data.member;
   const importRef=useRef<HTMLInputElement>(null);
   useEffect(()=>{const requested=new URLSearchParams(window.location.search).get("tab");if(["overview","products","orders","claims","settlements","members"].includes(requested||""))setTab(requested!);},[]);
@@ -36,8 +37,7 @@ export function CommerceApp({view}:{view:View}){
   function openProductForm(product:SupplyProduct|null=null){setError("");setSelected(product);setModal("product");}
   const showProduct=(product:SupplyProduct)=>{setSelected(product);setError("");};
   return <div className="fd-app"><input ref={importRef} type="file" accept=".xlsx" hidden onChange={e=>{const file=e.target.files?.[0];if(file)void importOrders(file);}}/>
-    <div className="fd-topline">산지의 좋은 과일과, 판매의 첫 시작을 잇습니다.<span>FRUIDAM · GROW TOGETHER</span></div>
-    <header className="fd-header"><BrandLogo/><nav className={mobile?"fd-nav open":"fd-nav"} aria-label="주 메뉴"><a className={view==="about"?"active":""} aria-current={view==="about"?"page":undefined} href="/about">열매담 이야기</a><a className={view==="catalog"?"active":""} href="/catalog">공급상품 둘러보기</a><a href="/studio">상세페이지 스튜디오</a><a className={view==="pricing"?"active":""} href="/pricing">요금제</a><a href="/supplier">농가·직매장 입점</a></nav><div className="fd-header-actions">{member?<><button aria-label="알림 열기" className="fd-icon" onClick={()=>{setNotices(!notices);if(!notices)void act({action:"readNotices"},"");}}><Bell size={20}/>{data.notices.some(n=>!n.read)&&<i/>}</button><a className="fd-button small" href={destination(member)}>나의 {roleName[member.role]} 공간 <ArrowRight size={15}/></a></>:<><a className="fd-login-link" href="/login">로그인</a><a className="fd-button small" href="/login?mode=signup">무료로 시작하기 <ArrowRight size={15}/></a></>}<button className="fd-mobile-menu fd-icon" aria-label="메뉴 열기" onClick={()=>setMobile(!mobile)}><Menu size={22}/></button></div></header>
+    <ServiceHeader active={`/${view === "home" ? "" : view}`} member={member} unread={data.notices.some(n=>!n.read)} onNotices={()=>{setNotices(!notices);if(!notices)void act({action:"readNotices"},"");}}/>
     {notices&&<aside className="fd-notices"><div className="fd-between"><h3>알림</h3><button className="fd-icon" onClick={()=>setNotices(false)} aria-label="알림 닫기"><X size={18}/></button></div>{data.notices.length?data.notices.map(n=><article key={n.id}><strong>{n.title}</strong><p>{n.body}</p><small>{new Date(n.createdAt).toLocaleString("ko-KR")}</small></article>):<p>새로운 알림이 없습니다.</p>}</aside>}
     {error&&<div className="fd-alert" role="alert"><CircleHelp size={18}/><span>{error}</span><button onClick={()=>setError("")} aria-label="오류 닫기"><X size={16}/></button></div>}
     {view==="about"&&<BrandStory/>}

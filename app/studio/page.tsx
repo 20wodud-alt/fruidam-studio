@@ -17,7 +17,8 @@ import { emptyDesignBrief } from "@/lib/studio";
 import { MarketDownloadOptions } from "@/components/market-download-options";
 import { exportStem, marketProfiles, type MarketImageFormat, type MarketPlatform } from "@/lib/market-export";
 import type { Member } from "@/lib/commerce";
-import { BrandLogo } from "@/components/brand-logo";
+import { ServiceHeader } from "@/components/service-header";
+import "@/app/studio-service-header.css";
 
 type Screen = "home" | "form" | "generating" | "outline" | "review" | "editor";
 const categories = ["식품 · 농수산물", "패션 · 잡화", "뷰티 · 생활", "가구 · 인테리어", "디지털 · 가전", "기타"];
@@ -112,12 +113,14 @@ export default function Studio() {
     if (draft && JSON.stringify(draft) !== savedSnapshot.current) { try { await save(draft); } catch { return false; } }
     setScreen(next); setMobileMenu(false); setModal(null); return true;
   }
-  async function returnHome(event: React.MouseEvent<HTMLAnchorElement>) {
+  async function leaveStudio(event: React.MouseEvent<HTMLAnchorElement>) {
     if(event.button!==0 || event.metaKey || event.ctrlKey || event.shiftKey || event.altKey)return;
     event.preventDefault();
+    const destination=event.currentTarget.href;
+    if(new URL(destination).pathname==="/studio")return;
     if(draft && JSON.stringify(draft)!==savedSnapshot.current){try{await save(draft);}catch{return;}}
     await queue.current.catch(()=>{});
-    window.location.assign("/");
+    window.location.assign(destination);
   }
   function openProject(project: StudioProject, target: Screen = "outline") {
     savedSnapshot.current = JSON.stringify(project); latestDraft.current = project; setDraft(project); setSaveState("saved"); setSelectedId(project.sections[0]?.id || ""); setScreen(target); setError("");
@@ -254,7 +257,8 @@ export default function Studio() {
 
   return <div className={`studio-app ${screen === "outline" ? "editor-mode outline-stage-mode" : screen === "editor" ? "editor-mode" : ""}`}>
     <style>{detailStyles}</style><input ref={fileRef} type="file" accept="image/jpeg,image/png,image/webp,image/avif" hidden onChange={e => void upload(e.target.files)} />
-    <header className="studio-header"><div className="header-left">{screen === "home" && <button className="icon-button mobile-nav" aria-label="메뉴 열기" onClick={() => setMobileMenu(!mobileMenu)}><Menu size={19} /></button>}<BrandLogo compact onClick={event=>void returnHome(event)}/>{screen !== "home" && <><span className="header-divider" /><span className="header-project">{screen === "form" ? "새 상페이지 만들기" : screen === "generating" ? form.name : draft?.product.name}</span></>}</div><div className="header-right"><a className="light-button" href="/">열매담 홈</a>{(viewer === null || viewer?.role === "admin") && <AIConnectionButton onClick={() => setModal("ai")} />}{draft && (screen === "outline" || screen === "review" || screen === "editor") && <button className={`save-indicator ${saveState}`} onClick={() => void save(draft).catch(() => {})}>{saveState === "saving" ? <LoaderCircle size={13} className="spin" /> : saveState === "error" ? <Save size={13} /> : <Check size={13} />}{saveState === "saving" ? "저장 중" : saveState === "error" ? "다시 저장" : "저장됨"}</button>}{(screen === "editor" || screen === "outline") && <button className="dark-button compact" onClick={() => setModal("download")}><Download size={14} />다운로드</button>}<button className="local-badge" onClick={() => setModal("help")}><i />{storage === "supabase" ? "SUPABASE" : storage === "local" ? "LOCAL" : "\uC5F0\uACB0 \uD655\uC778"}</button><span className="avatar">나</span><span className="profile-name">나의 작업실<small>PERSONAL</small></span></div></header>
+    <ServiceHeader active="/studio" member={viewer} onNavigate={event=>void leaveStudio(event)}/>
+    <header className="studio-header" aria-label="스튜디오 작업 도구"><div className="header-left">{screen === "home" && <button className="icon-button mobile-nav" aria-label="작업 메뉴 열기" onClick={() => setMobileMenu(!mobileMenu)}><Menu size={19} /></button>}<strong className="studio-workspace-title">상세페이지 스튜디오</strong>{screen !== "home" && <><span className="header-divider" /><span className="header-project">{screen === "form" ? "새 상페이지 만들기" : screen === "generating" ? form.name : draft?.product.name}</span></>}</div><div className="header-right">{(viewer === null || viewer?.role === "admin") && <AIConnectionButton onClick={() => setModal("ai")} />}{draft && (screen === "outline" || screen === "review" || screen === "editor") && <button className={`save-indicator ${saveState}`} onClick={() => void save(draft).catch(() => {})}>{saveState === "saving" ? <LoaderCircle size={13} className="spin" /> : saveState === "error" ? <Save size={13} /> : <Check size={13} />}{saveState === "saving" ? "저장 중" : saveState === "error" ? "다시 저장" : "저장됨"}</button>}{(screen === "editor" || screen === "outline") && <button className="dark-button compact" onClick={() => setModal("download")}><Download size={14} />다운로드</button>}<button className="local-badge" onClick={() => setModal("help")}><i />{storage === "supabase" ? "SUPABASE" : storage === "local" ? "LOCAL" : "\uC5F0\uACB0 \uD655\uC778"}</button><span className="avatar">나</span><span className="profile-name">나의 작업실<small>PERSONAL</small></span></div></header>
     {screen !== "editor" && screen !== "outline" && banner && <div className="welcome-banner"><span><Sparkles size={16} /><strong>아이디어를 팔리는 페이지로.</strong><span>상품의 매력을 발견하는 가장 쉬운 시작</span></span><button onClick={() => setModal("help")}>스튜디오 사용 가이드<ArrowRight size={13} /></button><button className="icon-button" aria-label="배너 닫기" onClick={() => setBanner(false)}><X size={14} /></button></div>}
     {error && <div className="global-error" role="alert"><span>{error}</span>{screen === "home" && <button onClick={() => void load()}>다시 불러오기</button>}<button className="icon-button" aria-label="오류 닫기" onClick={() => setError("")}><X size={14} /></button></div>}
 
