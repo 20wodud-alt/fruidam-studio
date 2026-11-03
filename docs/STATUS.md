@@ -18,9 +18,9 @@
 | 저장소 | https://github.com/20wodud-alt/fruidam-studio |
 | 작업 브랜치 | `codex/fruidam-seller-platform` |
 | 검토용 PR | https://github.com/20wodud-alt/fruidam-studio/pull/1 |
-| 최근 기능 코드 커밋 | `e857430` — 상품 등록 정보·사진·옵션·지역 운임 확장 |
-| 최근 운영 배포 | `dpl_5H1FMib3U8BCv9GENbiBvmBMonce` |
-| 배포 고유 주소 | https://fruidam-studio-4ipve5l39-20wodud.vercel.app |
+| 최근 기능 코드 커밋 | `4ff6e28` — 상품 등록·수정 창의 배경 클릭·Esc 닫기 방지 |
+| 최근 운영 배포 | `dpl_4YVR8dcg4s95xLeUQivLzyWRzth5` |
+| 배포 고유 주소 | https://fruidam-studio-fg6epzy91-20wodud.vercel.app |
 | 배포 상태 | 2026-11-03 Vercel에서 Production / Ready 확인 |
 
 작업 브랜치의 코드로 CLI에서 직접 배포했다. main 병합과 Git 자동 배포 연결은 별도 작업이다. 문서 저장·커밋·푸시는 운영 사이트 재배포와 구분한다.
