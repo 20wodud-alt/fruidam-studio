@@ -22,6 +22,5 @@ export function supplyForProject(state:CommerceState,member:Member,id:string):Su
 }
 
 export function supplyProjectProduct(supply:SupplyProduct):Product{
-  const extra=[`원산지: ${supply.origin}`,`공급처: ${supply.supplier}`,supply.variety&&`품종: ${supply.variety}`,supply.productionYear&&`생산연도: ${supply.productionYear}년`,supply.storageType&&`보관구분: ${supply.storageType}`,supply.storageInstructions&&`보관안내: ${supply.storageInstructions}`,supply.dispatchType&&`출고형태: ${supply.dispatchType}`,supply.carrier&&`택배사: ${supply.carrier}`,supply.cutoff&&`주문 마감: ${supply.cutoff}`,`배송: ${supply.shipping}`,supply.jejuSurcharge&&`제주 추가 배송비: ${supply.jejuSurcharge}원`,supply.remoteSurcharge&&`도서산간 추가 배송비: ${supply.remoteSurcharge}원`].filter(Boolean);
-  return {name:supply.name,category:"식품 · 농수산물",features:[supply.features,...extra].join("\n").slice(0,3000),price:"",options:supply.options.map(optionName).join("\n").slice(0,2000),images:supplyImages(supply),theme:"forest",length:"15",design:{...structuredClone(emptyDesignBrief),photoDirection:{mode:"original",people:false,instructions:"실제 상품 외관을 유지합니다."}}};
+  return {name:supply.name,category:"식품 · 농수산물",features:supply.features.slice(0,3000),price:"",options:supply.options.map(optionName).join("\n").slice(0,2000),images:supplyImages(supply),theme:"forest",length:"15",design:{...structuredClone(emptyDesignBrief),photoDirection:{mode:"original",people:false,instructions:"실제 상품 외관을 유지합니다."}}};
 }
