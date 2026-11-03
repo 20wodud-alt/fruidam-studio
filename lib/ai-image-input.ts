@@ -5,6 +5,7 @@ import sharp from "sharp";
 import { sampleImageFile } from "./sample-photos";
 
 export async function imageInputPart(url:string,size=1200){
+  if(!Number.isSafeInteger(size)||size<1||size>4096)throw new Error("참고 사진의 처리 크기를 확인해주세요. 원본 사진은 유지됩니다.");
   let buffer:Buffer;
   if(/^\/api\/uploads\/[a-f0-9-]+\.webp$/.test(url))buffer=await readAsset(path.basename(url));
   else if(sampleImageFile(url))buffer=await fs.readFile(path.join(process.cwd(),"public",sampleImageFile(url)!));
