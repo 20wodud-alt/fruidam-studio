@@ -5,6 +5,7 @@ import { ArrowUp, Check, ImagePlus, LoaderCircle, Plus, X } from "lucide-react";
 import { optionName, supplyImages, type Member, type SupplyOption, type SupplyProduct } from "@/lib/commerce";
 import { prepareImageUpload } from "@/lib/client-upload";
 import { OriginPicker } from "@/components/origin-picker";
+import { FormattedNumberInput } from "@/components/formatted-number-input";
 
 type Props={product:SupplyProduct|null;busy:boolean;serverError?:string;suppliers?:Member[];defaultSupplierId?:string;onSubmit:(payload:Record<string,unknown>)=>Promise<void>};
 export function SupplyProductForm({product,busy,onSubmit,serverError,suppliers,defaultSupplierId}:Props){
@@ -25,9 +26,9 @@ export function SupplyProductForm({product,busy,onSubmit,serverError,suppliers,d
     <fieldset disabled={busy}><legend>기본 정보</legend>
       {suppliers&&<label>공급처<select name="supplierId" defaultValue={product?.supplierId||defaultSupplierId} required>{suppliers.map(m=><option key={m.id} value={m.id}>{m.role==="admin"?`${m.name} · 운영자 직접 관리`:m.name}</option>)}</select><small>직접 관리하거나 승인된 농가·직매장을 선택하세요.</small></label>}
       <label>상품명<input name="name" required maxLength={100} defaultValue={product?.name} placeholder="예: 정품 부사 사과"/></label>
-      <div className="fd-form-row"><label>상품 분류<select name="category" defaultValue={product?.category}>{["사과·배","감귤·만감류","포도·기타"].map(c=><option key={c}>{c}</option>)}</select></label><label>상품 태그<input name="badge" maxLength={60} defaultValue={product?.badge} placeholder="예: 국내과일"/></label></div>
+      <input type="hidden" name="badge" value=""/>
+      <div className="fd-form-row"><label>상품 분류<select name="category" defaultValue={product?.category}>{["사과·배","감귤·만감류","포도·기타"].map(c=><option key={c}>{c}</option>)}</select></label><label>품종<input name="variety" maxLength={100} defaultValue={product?.variety} placeholder="예: 부사"/></label></div>
       <OriginPicker initialOrigin={product?.origin}/>
-      <label>품종<input name="variety" maxLength={100} defaultValue={product?.variety} placeholder="예: 부사"/></label>
       <label>상품 특징·안내<textarea name="features" required rows={4} maxLength={3000} defaultValue={product?.features} placeholder="실제 상품의 특징과 구성, 셀러에게 안내할 내용을 입력하세요."/></label>
     </fieldset>
     <fieldset disabled={busy}><legend>상품 사진 <span>{images.length}/10장</span></legend>
@@ -42,10 +43,10 @@ export function SupplyProductForm({product,busy,onSubmit,serverError,suppliers,d
       <label>보관안내<textarea name="storageInstructions" rows={3} maxLength={1500} defaultValue={product?.storageInstructions} placeholder="상품에 맞는 보관 온도·방법·섭취 안내를 입력하세요."/></label>
     </fieldset>
     <fieldset disabled={busy}><legend>배송·출고 정보</legend>
-      <label>기본 배송비 표시<select name="shippingLabel" defaultValue={product?.shippingLabel||"included"}><option value="included">공급가에 기본 배송비 포함</option><option value="free">무료배송</option></select></label>
-      <div className="fd-form-row"><label>출고형태<input name="dispatchType" maxLength={60} defaultValue={product?.dispatchType} placeholder="예: 센터 출고 / 산지 출고"/></label><label>택배사<input name="carrier" maxLength={60} defaultValue={product?.carrier} placeholder="예: CJ대한통운"/></label></div>
-      <div className="fd-form-row"><label>제주 추가 배송비 (원)<input name="jejuSurcharge" type="number" min={0} max={1000000} step={1} defaultValue={product?.jejuSurcharge||0}/></label><label>도서산간 추가 배송비 (원)<input name="remoteSurcharge" type="number" min={0} max={1000000} step={1} defaultValue={product?.remoteSurcharge||0}/></label></div>
-      <p className="fd-caption">기본 배송비는 옵션 공급가에 포함합니다. 지역별 추가 배송비는 상품 상세에 별도로 안내합니다.</p>
+      <label>기본 배송비 표시<input value="무료배송" readOnly/><input type="hidden" name="shippingLabel" value="free"/></label>
+      <div className="fd-form-row"><label>출고형태<select name="dispatchType" defaultValue={product?.dispatchType||"산지출고"}>{Array.from(new Set(["산지출고","센터출고",...(product?.dispatchType?[product.dispatchType]:[])])).map(value=><option key={value}>{value}</option>)}</select></label><label>택배사<input name="carrier" maxLength={60} defaultValue={product?.carrier} placeholder="예: CJ대한통운"/></label></div>
+      <div className="fd-form-row"><label>제주 추가 배송비 (원)<FormattedNumberInput name="jejuSurcharge" initialValue={product?.jejuSurcharge||0} max={1000000}/></label><label>도서산간 추가 배송비 (원)<FormattedNumberInput name="remoteSurcharge" initialValue={product?.remoteSurcharge||0} max={1000000}/></label></div>
+      <p className="fd-caption">기본 배송은 무료입니다. 제주·도서산간 추가 배송비는 별도로 적용됩니다.</p>
       <div className="fd-form-row"><label>주문 마감 시간<input type="time" name="cutoff" required defaultValue={product?.cutoff||"12:00"}/></label><label>출고 예정·배송 안내<input name="shipping" required maxLength={200} defaultValue={product?.shipping} placeholder="예: 평일 주문 다음 영업일 출고"/></label></div>
     </fieldset>
     <fieldset disabled={busy}><legend>옵션별 구성·공급가·재고</legend>
@@ -55,7 +56,7 @@ export function SupplyProductForm({product,busy,onSubmit,serverError,suppliers,d
         <div className="fd-form-row"><label>등급<input value={option.grade||""} maxLength={60} placeholder="예: 정품" onChange={e=>change(index,{grade:e.target.value})}/></label><label>중량<input value={option.weight||""} maxLength={60} placeholder="예: 2kg" onChange={e=>change(index,{weight:e.target.value})}/></label></div>
         <div className="fd-form-row"><label>크기·규격<input value={option.size||""} maxLength={60} placeholder="예: 중소과" onChange={e=>change(index,{size:e.target.value})}/></label><label>과수·개수<input value={option.fruitCount||""} maxLength={60} placeholder="예: 13과 내외" onChange={e=>change(index,{fruitCount:e.target.value})}/></label></div>
         <label>옵션명 (직접 지정)<input value={option.label} maxLength={200} placeholder="비워두면 위 구성으로 자동 생성" onChange={e=>change(index,{label:e.target.value})}/></label>
-        <div className="fd-form-row"><label>배송비 포함 공급가<input type="number" min={100} max={10000000} required value={option.price} onChange={e=>change(index,{price:Number(e.target.value)})}/></label><label>출고 가능 수량<input type="number" min={0} max={100000} required value={option.stock} onChange={e=>change(index,{stock:Number(e.target.value)})}/></label></div>
+        <div className="fd-form-row"><label>배송비 포함 공급가<FormattedNumberInput initialValue={option.price} min={100} max={10000000} required onValueChange={price=>change(index,{price})}/></label><label>출고 가능 수량<FormattedNumberInput initialValue={option.stock} max={100000} required onValueChange={stock=>change(index,{stock})}/></label></div>
         <small className="fd-option-preview">표시: {optionName(option)||"옵션 구성을 입력해주세요."}</small>
       </section>)}
       <button type="button" className="fd-button outline" disabled={options.length>=20} onClick={()=>setOptions(items=>[...items,{id:crypto.randomUUID(),label:"",price:0,stock:0}])}><Plus size={15}/>옵션 추가 ({options.length}/20)</button>
