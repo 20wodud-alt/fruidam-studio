@@ -21,3 +21,16 @@ WebP로 최적화해 서비스 내부에서 제공하며 외부 이미지 서버
 - https://images.unsplash.com/photo-1581501171927-1b2a5c1625df
 
 로컬 샘플 이미지는 명시적 경로 목록으로만 검증·처리하며 사용자 입력으로 임의 파일이나 원격 URL을 읽지 않는다. AI 이미지 참고 입력과 로컬 사진 도구에서도 같은 경로 목록을 사용한다.
+
+## 열매담 이야기 브랜드 이미지 (2026-11-03)
+
+- 파일: `public/photos/fruidam-harvest-story.webp` (1600×900, 178,372바이트).
+- 용도: `/about` 열매담 이야기의 첫 화면. 기존 사이트 사진을 대체하지 않고 신규 브랜드 자산으로 추가했다.
+- 제작: 기본 제공 `image_gen` 도구로 새로 생성. 특정 실존 농가나 등록 상품의 실사 증빙이 아닌 AI 브랜드 연출이며 화면에도 이를 표시한다. 원본 PNG는 기본 생성 폴더에 보존하고 WebP 사본을 저장소에 포함했다.
+- 원본: `C:/Users/20wod/.codex/generated_images/01a19a13-aaa3-7293-95ac-888545be7740/exec-54c486f1-473a-42b0-93aa-f2d36228b527.png`.
+- 아이콘: 기존 `lucide-react` 선형 아이콘을 조합. 로고는 기존 열매담 붓글씨 로고 유지.
+- 보조 과수원 사진: 위의 기존 `fruit-orchard.webp`를 재사용.
+
+최종 생성 프롬프트:
+
+> Use case: photorealistic-natural. Asset type: premium Korean fruit marketplace brand-story website hero photograph, landscape wide composition. Primary request: a warm, understated editorial photograph in a real-looking Korean apple orchard at early morning in autumn, a farmer's gently weathered hands holding a shallow wooden harvest crate filled with fresh red and gold apples with a few green leaves, focus on the hands and fruit on the right half, soft distant mountains and orchard foliage on the left half with darker defocused green negative space for white web typography. No visible face, no text, no typography, no logos, no watermark, no labels, no collage, no illustrations. Natural soft sun, tactile fruit skins, honest rural atmosphere, restrained forest green and warm ivory palette, luxury independent food magazine art direction, realistic anatomy and fruit. This is a conceptual brand image, not a specific real farm or product. Output a single wide landscape image.
