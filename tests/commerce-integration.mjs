@@ -22,6 +22,13 @@ try{
   assert.equal((await api(admin.cookie,"/api/commerce",{action:"approveSupplier",id:supplier.id,commission:1250})).status,200);
   const png=await sharp({create:{width:80,height:80,channels:3,background:"#c34030"}}).png().toBuffer();const upload=new FormData();upload.set("file",new File([png],"fixture.png",{type:"image/png"}));const uploadResponse=await fetch(`${origin}/api/uploads`,{method:"POST",headers:{Origin:origin,Cookie:supplier.cookie},body:upload});assert.equal(uploadResponse.status,200);asset=(await uploadResponse.json()).url;
   const productInput={action:"supplierProduct",name:"자동검증 전용 상품",category:"사과·배",origin:"테스트 데이터",features:"자동 검증 후 삭제되는 공급상품",image:asset,cutoff:"12:00",shipping:"검증용 출고 안내",options:[{id:"fixture-option",label:"3kg",price:20000,stock:10}]};
+  assert.equal((await api(seller.cookie,"/api/commerce",productInput)).status,403,"seller cannot register supply products");
+  const direct=await api(admin.cookie,"/api/commerce",{...productInput,name:"운영자 직접등록 검증 상품"});assert.equal(direct.status,200,"admin can register directly");
+  const directProduct=direct.data.products.find(p=>p.supplierId===admin.id);assert.ok(directProduct);assert.equal(directProduct.status,"pending","admin registration still requires product review");
+  assert.equal((await api(supplier.cookie,"/api/commerce",{...productInput,id:directProduct.id})).status,403,"supplier cannot edit admin product");
+  const delegated=await api(admin.cookie,"/api/commerce",{...productInput,name:"공급처 대리등록 검증 상품",supplierId:supplier.id});assert.equal(delegated.status,200,"admin can register for approved supplier");
+  const delegatedProduct=delegated.data.products.find(p=>p.name==="공급처 대리등록 검증 상품");assert.equal(delegatedProduct.supplierId,supplier.id);
+  const edited=await api(admin.cookie,"/api/commerce",{...productInput,id:delegatedProduct.id,name:"공급처 대리수정 검증 상품"});assert.equal(edited.status,200);assert.equal(edited.data.products.find(p=>p.id===delegatedProduct.id).supplierId,supplier.id,"admin edit preserves supplier ownership");
   const saved=await api(supplier.cookie,"/api/commerce",productInput);assert.equal(saved.status,200);const product=saved.data.products.find(p=>p.supplierId===supplier.id);assert.ok(product);assert.equal(product.status,"pending");
   assert.equal((await api(admin.cookie,"/api/commerce",{action:"approveProduct",id:product.id})).status,200);
   const created=await api(seller.cookie,"/api/commerce",{action:"createProject",productId:product.id});assert.equal(created.status,200);projects.add(created.data.projectId);
@@ -48,6 +55,9 @@ try{
   assert.equal((await api(supplier.cookie,"/api/commerce",{action:"orderStatus",id:placed.id,status:"delivered"})).status,200);
   assert.equal((await api(admin.cookie,"/api/commerce",{action:"settle",ids:[placed.id]})).status,200);
   const notices=await api(seller.cookie,"/api/commerce");assert.ok(notices.data.notices.some(n=>n.title.includes("배송 완료")));
+  assert.equal((await api(admin.cookie,"/api/commerce",{action:"approveProduct",id:directProduct.id})).status,200);
+  await stateUpdate(s=>{s.members.find(m=>m.id===seller.id).unlocked.push(directProduct.id);});
+  assert.equal((await api(seller.cookie,"/api/commerce",{...order,productId:directProduct.id})).status,200,"admin-managed supply product supports order drafts");
   console.log("PASS: real Auth login, role escalation prevention, supplier approval/product review, scoped studio, trial/export limits, price validation, order states, notifications and settlement records. No email, AI or payment calls.");
 }finally{
   const ids=new Set(users);

@@ -38,15 +38,18 @@ export async function POST(request:Request){
     const state=await commerceAccess(s=>{
       const actor=s.members.find(m=>m.id===member.id)!;
       if(input.action==="supplierProduct"){
-        if(actor.role!=="supplier" || !actor.approved)throw new CommerceError("입점 승인 후 상품을 등록할 수 있습니다.",403);
+        if(actor.role!=="admin" && (actor.role!=="supplier" || !actor.approved))throw new CommerceError("입점 승인 후 상품을 등록할 수 있습니다.",403);
         const id=text(input.id)||randomUUID();const existing=s.products.find(p=>p.id===id);
-        if(existing&&existing.supplierId!==actor.id)throw new CommerceError("수정 권한이 없습니다.",403);
+        if(existing&&actor.role!=="admin"&&existing.supplierId!==actor.id)throw new CommerceError("수정 권한이 없습니다.",403);
+        const supplierId=actor.role==="admin"?(text(input.supplierId)||existing?.supplierId||actor.id):actor.id;
+        const supplier=s.members.find(m=>m.id===supplierId);
+        if(!supplier || !(supplier.role==="admin" || (supplier.role==="supplier"&&supplier.approved)))throw new CommerceError("승인된 공급처를 선택해주세요.");
         const name=text(input.name,100),origin=text(input.origin,100),features=text(input.features,3000),shipping=text(input.shipping,200),image=text(input.image,1000),cutoff=text(input.cutoff,5);
         if(!name||!origin||!features||!shipping||!/^\d{2}:\d{2}$/.test(cutoff))throw new CommerceError("필수 상품 정보와 주문 마감 시간을 입력해주세요.");
         if(image&&!/^\/api\/uploads\/[a-f0-9-]+\.webp$/.test(image))throw new CommerceError("직접 업로드한 실제 상품 사진을 선택해주세요.");
         const options:SupplyProduct["options"]=Array.isArray(input.options)?input.options.slice(0,20).map((o:{id?:string;label?:string;price?:number;stock?:number})=>({id:text(o.id)||randomUUID(),label:text(o.label,100),price:number(o.price,100,10000000),stock:number(o.stock,0,100000)})):[];
         if(!options.length||options.some(o=>!o.label)||new Set(options.map(o=>o.id)).size!==options.length)throw new CommerceError("상품 옵션을 확인해주세요.");
-        const next:SupplyProduct={id,supplierId:actor.id,supplier:actor.name,name,origin,features,shipping,image,cutoff,category:text(input.category,30)||"포도·기타",options,status:"pending",updatedAt:new Date().toISOString()};
+        const next:SupplyProduct={id,supplierId:supplier.id,supplier:supplier.name,name,origin,features,shipping,image,cutoff,category:text(input.category,30)||"포도·기타",options,status:"pending",updatedAt:new Date().toISOString()};
         if(existing){s.products[s.products.indexOf(existing)]=next;for(const m of s.members)if(m.unlocked.includes(id)||m.projects.some(p=>s.projectProducts[p]===id))notice(s,m.id,"공급 조건 변경",`${name}의 공급 조건이 변경되어 검수 중입니다. 최신 내용을 확인해주세요.`);}else s.products.unshift(next);
       }else if(input.action==="approveSupplier"){
         if(actor.role!=="admin")throw new CommerceError("운영자만 처리할 수 있습니다.",403);
