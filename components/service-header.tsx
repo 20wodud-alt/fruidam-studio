@@ -26,7 +26,7 @@ export function ServiceHeader({ active, member, unread = false, onNotices, onNav
         {links.map(([href, label]) => <a key={href} href={href} className={active === href ? "active" : ""} aria-current={active === href ? "page" : undefined} onClick={onNavigate}>{label}</a>)}
       </nav>
       <div className="fd-header-actions">
-        {member ? <>{onNotices && <button aria-label="알림 열기" className="fd-icon" onClick={onNotices}><Bell size={20}/>{unread && <i/>}</button>}<a className="fd-button small" href={destination} onClick={onNavigate}>나의 {role} 공간 <ArrowRight size={15}/></a></> : <><a className="fd-login-link" href="/login" onClick={onNavigate}>로그인</a><a className="fd-button small" href="/login?mode=signup" onClick={onNavigate}>무료로 시작하기 <ArrowRight size={15}/></a></>}
+        {member ? <>{onNotices && <button aria-label="알림 열기" className="fd-icon" onClick={onNotices}><Bell size={20}/>{unread && <i/>}</button>}<a className="fd-button small" href={destination} onClick={onNavigate}>나의 {role} 공간 <ArrowRight size={15}/></a></> : <><a className="fd-login-link" href="/login" onClick={onNavigate}>로그인</a>{active === "/" && <a className="fd-button small" href="/login?mode=signup" onClick={onNavigate}>무료로 시작하기 <ArrowRight size={15}/></a>}</>}
         <button className="fd-mobile-menu fd-icon" aria-label="메뉴 열기" aria-expanded={mobile} aria-controls="fruidam-service-menu" onClick={() => setMobile(!mobile)}><Menu size={22}/></button>
       </div>
     </header>
