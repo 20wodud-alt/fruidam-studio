@@ -29,6 +29,8 @@ export default function Studio() {
   const [draft, setDraft] = useState<StudioProject | null>(null);
   const [generationStages,setGenerationStages]=useState<GenerationStage[]>([]);const [generationError,setGenerationError]=useState("");const generationId=useRef("");
   const [form, setForm] = useState<Product>(structuredClone(emptyProduct));
+  const [sourceProductId,setSourceProductId]=useState("");
+  const [sourceProductName,setSourceProductName]=useState("");
   const [imageProgress,setImageProgress]=useState<{busy:boolean;done:number;total:number;label:string;error:string}|null>(null);
   const imageLock=useRef(false);const imageStop=useRef(false);
   const [selectedId, setSelectedId] = useState("");
@@ -65,9 +67,16 @@ export default function Studio() {
 
   async function load() {
     setError("");
-    try { const r = await fetch("/api/studio", { cache: "no-store" }); const data = await r.json(); if (!r.ok) throw new Error(data.error); setStorage(r.headers.get("X-Fruidam-Storage") === "supabase" ? "supabase" : "local"); setProjects(data); const requested=new URLSearchParams(window.location.search).get("project");const project=data.find((p:StudioProject)=>p.id===requested);if(project)openProject(project); }
-    catch (e) { setError(e instanceof Error ? e.message : "작업을 불러오지 못했어요."); }
-    finally { setLoading(false); }
+    try {
+      const response=await fetch("/api/studio",{cache:"no-store"});const data=await response.json();if(!response.ok)throw new Error(data.error);
+      setStorage(response.headers.get("X-Fruidam-Storage")==="supabase"?"supabase":"local");setProjects(data);
+      const query=new URLSearchParams(window.location.search),sourceId=query.get("supplyProduct");
+      if(sourceId){
+        const sourceResponse=await fetch(`/api/commerce/product-draft?productId=${encodeURIComponent(sourceId)}`,{cache:"no-store"});const source=await sourceResponse.json();if(!sourceResponse.ok)throw new Error(source.error);
+        setForm(source.product);setSourceProductId(source.productId);setSourceProductName(source.product.name);setDraft(null);latestDraft.current=null;savedSnapshot.current="";generationId.current="";setScreen("form");
+      }else{const project=data.find((item:StudioProject)=>item.id===query.get("project"));if(project)openProject(project);}
+    }catch(reason){setError(reason instanceof Error?reason.message:"상품 정보를 불러오지 못했습니다.");}
+    finally{setLoading(false);}
   }
   useEffect(() => { const timer = setTimeout(() => void load(), 0); return () => clearTimeout(timer); }, []);
   useEffect(()=>{void fetch("/api/account",{cache:"no-store"}).then(r=>r.json()).then(data=>setViewer(data.member||null)).catch(()=>setViewer(null));},[]);
@@ -128,7 +137,7 @@ export default function Studio() {
   function openProject(project: StudioProject, target: Screen = "outline") {
     savedSnapshot.current = JSON.stringify(project); latestDraft.current = project; setDraft(project); setSaveState("saved"); setSelectedId(project.sections[0]?.id || ""); setScreen(target); setError("");
   }
-  async function startNew() { if(viewer&&viewer.role!=="admin"){window.location.assign("/catalog");return;}if (await navigate("form")) {generationId.current="";setForm(structuredClone(emptyProduct));} }
+  async function startNew() { if(viewer&&viewer.role!=="admin"){window.location.assign("/catalog");return;}if (await navigate("form")) {generationId.current="";setSourceProductId("");setSourceProductName("");setForm(structuredClone(emptyProduct));} }
   async function action(payload: object, message: string) {
     if (busyLock.current) return false;
     busyLock.current = true; setBusy(true); setError("");
@@ -141,14 +150,21 @@ export default function Studio() {
     if(!generationId.current)generationId.current=crypto.randomUUID();
     try{
       let created:StudioProject|null=null;
+      if(sourceProductId){
+        setGenerationStages([{id:"product",label:"상품 정보",detail:"불러온 상품 정보로 페이지를 구성하고 있어요.",state:"running"}]);
+        const response=await fetch("/api/commerce",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({action:"createProject",productId:sourceProductId,product:form,requestId:generationId.current})});
+        const data=await response.json();if(!response.ok)throw new Error(data.error||"구성안을 만들지 못했습니다.");
+        created=data.project;setGenerationStages([{id:"product",label:"상품 정보",detail:"상품 정보와 사진을 준비했어요.",state:"complete"},{id:"save",label:"작업 저장",detail:"작업을 안전하게 저장했어요.",state:"complete"}]);
+      }else{
       const response=await fetch("/api/studio/create",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({product:form,requestId:generationId.current})});
       if(!response.ok){const data=await response.json();throw new Error(data.error || "구성안 생성을 시작하지 못했어요.");}
       if(!response.body)throw new Error("진행 정보를 받지 못했어요.");
       const reader=response.body.getReader(),decoder=new TextDecoder();let buffer="";
       const event=(item:GenerationEvent)=>{if(item.type==="error")throw new Error(item.error);if(item.type==="stage")setGenerationStages(stages=>[...stages.filter(s=>s.id!==item.stage.id),item.stage]);else if(item.type==="complete")created=item.project;};
       while(true){const {value,done}=await reader.read();buffer+=decoder.decode(value,{stream:!done});let boundary;while((boundary=buffer.indexOf("\n"))>=0){const line=buffer.slice(0,boundary);buffer=buffer.slice(boundary+1);if(line.trim())event(JSON.parse(line));}if(done)break;}if(buffer.trim())event(JSON.parse(buffer));
+      }
       if(!created)throw new Error("작성 완료 정보를 확인하지 못했어요. 다시 시도해주세요.");
-      const project=created as StudioProject;setProjects(projects=>[project,...projects.filter(p=>p.id!==project.id)]);openProject(project);setScreen("generating");
+      const project=created as StudioProject;if(sourceProductId){window.history.replaceState(null,"",`/studio?project=${encodeURIComponent(project.id)}`);setSourceProductId("");setSourceProductName("");}setProjects(projects=>[project,...projects.filter(p=>p.id!==project.id)]);openProject(project);setScreen("generating");
       if(project.product.design?.photoDirection?.mode!=="original"){
         setGenerationStages(stages=>[...stages,{id:"images",label:"사진 연출",detail:"상품 원본을 참고해 산지·모델컷을 준비해요.",state:"running"}]);await generateImages({},project);
       }
@@ -270,7 +286,7 @@ export default function Studio() {
       <div className="dashboard-toolbar"><div className="segmented"><button className={filter === "all" ? "selected" : ""} onClick={() => setFilter("all")}><FileText size={13} />전체 작업<span>{projects.length}</span></button><button className={filter === "starred" ? "selected" : ""} onClick={() => setFilter("starred")}><Star size={13} />즐겨찾기</button></div><div className="dashboard-tools"><label className="search"><Search size={14} /><input aria-label="작업 검색" placeholder="작업 검색" value={query} onChange={e => setQuery(e.target.value)} /></label><select aria-label="작업 정렬" value={sort} onChange={e => setSort(e.target.value)}><option value="newest">최근 수정 순</option><option value="name">이름 순</option></select></div></div>
       {loading ? <div className="loading-state"><LoaderCircle className="spin" size={24} /><p>작업실을 준비하고 있어요.</p></div> : <div className="project-grid"><button className="new-project-card" onClick={() => void startNew()}><span><FilePlus2 size={24} /></span><strong>새 상세페이지 만들기</strong><small>새로운 가능성을 펼쳐보세요</small><Plus size={16} /></button>{shownProjects.map(project => <article className="project-card" key={project.id}><button className="project-cover" onClick={() => openProject(project)}>{project.product.images[0] ? <img src={project.product.images[0]} alt={project.product.name} /> : <div className="cover-placeholder"><LayoutTemplate size={32} /></div>}<span className="project-category">{project.product.category.split(" · ")[0]}</span><span className="cover-open">이어 편집하기<ArrowRight size={14} /></span></button><button className={`project-star icon-button ${project.starred ? "starred" : ""}`} aria-label={`${project.product.name} 즐겨찾기 ${project.starred ? "해제" : "추가"}`} disabled={busy} onClick={() => void action({ action: "star", id: project.id }, "즐겨찾기를 변경했어요.")}><Star size={15} fill={project.starred ? "currentColor" : "none"} /></button><div className="project-card-body"><button onClick={() => openProject(project)}><h3>{project.product.name}</h3></button><span>{new Intl.DateTimeFormat("ko-KR", { month: "short", day: "numeric" }).format(new Date(project.updatedAt))} 수정<span>·</span>{project.sections.length}개 섹션</span><div className="project-card-actions"><button aria-label={`${project.product.name} 복제`} disabled={busy} onClick={() => void action({ action: "duplicate", id: project.id }, "작업을 복제했어요.")}><Copy size={13} /></button><button aria-label={`${project.product.name} 삭제`} onClick={() => setDeleteProject(project)}><Trash2 size={13} /></button></div></div></article>)}</div>}{!loading && !shownProjects.length && <p className="empty-message">{query ? "검색 결과가 없어요. 다른 검색어로 찾아보세요." : filter === "starred" ? "별을 눌러 자주 쓰는 작업을 모아보세요." : "첫 번째 상세페이지를 만들어보세요."}</p>}<div className="dashboard-foot"><span><i />상품의 이야기를, 나만의 상세페이지로</span><span>Made for your next idea ✦</span></div></main></div>}
 
-    {screen === "form" && <ProductCreationForm form={form} setForm={setForm} uploading={uploading} busy={busy} briefBusy={briefBusy} onBriefBusyChange={setBriefBusy} onUpload={() => chooseUpload("form")} onDrop={files => {imageTarget.current="form";void upload(files);}} onGenerate={() => void generate()} onBack={() => void navigate("home")} onSample={() => {setForm(structuredClone(demoProduct));setToast("샘플 정보를 채웠어요. 자유롭게 바꿔보세요.");}} />}
+    {screen === "form" && <ProductCreationForm sourceLabel={sourceProductName} form={form} setForm={setForm} uploading={uploading} busy={busy} briefBusy={briefBusy} onBriefBusyChange={setBriefBusy} onUpload={() => chooseUpload("form")} onDrop={files => {imageTarget.current="form";void upload(files);}} onGenerate={() => void generate()} onBack={() => void navigate("home")} onSample={() => {setForm(structuredClone(demoProduct));setToast("샘플 정보를 채웠어요. 자유롭게 바꿔보세요.");}} />}
 
     {screen === "generating" && <GenerationLoading name={form.name} stages={generationStages} error={generationError} imageProgress={imageProgress} onBack={()=>{generationId.current="";setGenerationError("");setScreen("form");}} onRetry={()=>void generate()}/> }
     {screen !== "generating" && imageProgress && <div className="image-generation-progress" role="status"><div><Sparkles size={15}/><strong>{imageProgress.label}</strong><span>{imageProgress.done}/{imageProgress.total}</span>{imageProgress.busy ? <button onClick={()=>{imageStop.current=true;}}>남은 생성 중지</button> : <button aria-label="사진 생성 상태 닫기" onClick={()=>setImageProgress(null)}><X size={13}/></button>}</div>{imageProgress.error && <p>{imageProgress.error}<button onClick={()=>void generateImages()}>비어 있는 연출컷 다시 생성</button></p>}{imageProgress.busy && <small>대표·옵션 원본 유지 · 사진당 수십 초가 걸릴 수 있어요</small>}</div>}

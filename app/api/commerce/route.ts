@@ -2,12 +2,14 @@ import { randomUUID } from "node:crypto";
 import { NextResponse } from "next/server";
 import { currentMember, requireMember, sameOrigin } from "@/lib/commerce-auth";
 import { CommerceError, commerceAccess } from "@/lib/commerce-store";
-import { canOrder, orderLabels, plans, sampleProducts, subscribed, type CommerceState, type Member, type SupplyProduct, type SupplyOrder } from "@/lib/commerce";
+import { optionName, canOrder, orderLabels, plans, sampleProducts, subscribed, type CommerceState, type Member, type SupplyProduct, type SupplyOrder } from "@/lib/commerce";
 import { studioAccess } from "@/lib/studio-store";
-import { emptyDesignBrief, generateSections, type Product, type StudioProject } from "@/lib/studio";
+import { generateSections, type Product, type StudioProject } from "@/lib/studio";
 import { createPendingOrder } from "@/lib/commerce-orders";
 import { supplyDetails } from "@/lib/commerce-product-details";
-import { optionName, supplyImages } from "@/lib/commerce";
+
+import { supplyForProject, supplyProjectProduct, supplyProjectId } from "@/lib/supply-project";
+import { product as validateProduct } from "@/lib/validate-product";
 import { revokeSupplierApproval } from "@/lib/commerce-members";
 export const runtime="nodejs";
 export const dynamic="force-dynamic";
@@ -29,16 +31,23 @@ export async function POST(request:Request){
     const input=await request.json();const member=await requireMember();
     if(input.action==="createProject"){
       const state=await commerceAccess();const fresh=state.members.find(m=>m.id===member.id)!;
-      if(fresh.role!=="seller")throw new CommerceError("셀러 계정에서 제작해주세요.",403);
-      if(!subscribed(fresh)&&fresh.credits<1&&(fresh.trialProject||Date.now()-new Date(fresh.createdAt).getTime()>3*86400000))throw new CommerceError("무료 체험이 종료됐습니다. 이용권을 선택해주세요.",403);
-      const supply=state.products.find(p=>p.id===input.productId&&p.status==="approved")||sampleProducts.find(p=>p.id===input.productId);
-      if(!supply)throw new CommerceError("공급 상품을 선택해주세요.");
-      const extra=[supply.variety&&`품종: ${supply.variety}`,supply.productionYear&&`생산연도: ${supply.productionYear}년`,supply.storageType&&`보관구분: ${supply.storageType}`,supply.storageInstructions&&`보관안내: ${supply.storageInstructions}`,supply.dispatchType&&`출고형태: ${supply.dispatchType}`,supply.carrier&&`택배사: ${supply.carrier}`,supply.jejuSurcharge&&`제주 추가 배송비: ${supply.jejuSurcharge}원`,supply.remoteSurcharge&&`도서산간 추가 배송비: ${supply.remoteSurcharge}원`].filter(Boolean);
-      const id=randomUUID();const info:Product={name:supply.name,category:"식품 · 농수산물",features:[supply.features,`원산지: ${supply.origin}`,`배송: ${supply.shipping}`,...extra].join("\n").slice(0,3000),price:"",options:supply.options.map(optionName).join("\n").slice(0,2000),images:supplyImages(supply),theme:"forest",length:"15",design:{...emptyDesignBrief,photoDirection:{mode:"original",people:false,instructions:"실제 상품 외관을 유지합니다."}}};
+      const supply=supplyForProject(state,fresh,text(input.productId));
+      const id=supplyProjectId(member.id,input.requestId);
+      const reserved=fresh.projects.includes(id)&&state.projectProducts[id]===supply.id;
+      if(reserved){const existing=(await studioAccess()).find(project=>project.id===id);if(existing)return NextResponse.json({ok:true,projectId:id,project:existing,url:`/studio?project=${id}`});}
+      if(!reserved&&fresh.role==="seller"&&!subscribed(fresh)&&fresh.credits<1&&(fresh.trialProject||Date.now()-new Date(fresh.createdAt).getTime()>3*86400000))throw new CommerceError("무료 체험이 종료됐습니다. 이용권을 선택해주세요.",403);
+      let info:Product;
+      try{info=input.product===undefined?supplyProjectProduct(supply):validateProduct(input.product);}catch(error){throw new CommerceError(error instanceof Error?error.message:"상품 정보를 확인해주세요.");}
       const project:StudioProject={id,product:info,sections:generateSections(info),starred:false,createdAt:new Date().toISOString(),updatedAt:new Date().toISOString(),supplyProductId:supply.id};
-      await commerceAccess(s=>{const m=s.members.find(m=>m.id===member.id)!;if(!subscribed(m)&&m.credits<1){if(m.trialProject||Date.now()-new Date(m.createdAt).getTime()>3*86400000)throw new CommerceError("무료 체험을 이미 사용했습니다.",409);m.trialProject=id;}m.projects.push(id);s.projectProducts[id]=supply.id;});
-      await studioAccess(projects=>{projects.unshift(project);});
-      return NextResponse.json({ok:true,projectId:id,url:`/studio?project=${id}`});
+      await commerceAccess(s=>{
+        const actor=s.members.find(m=>m.id===member.id)!;supplyForProject(s,actor,supply.id);
+        if(actor.projects.includes(id)){if(s.projectProducts[id]!==supply.id)throw new CommerceError("다른 작업과 요청이 겹칩니다. 다시 시작해주세요.",409);return;}
+        if(s.projectProducts[id])throw new CommerceError("다른 작업과 요청이 겹칩니다. 다시 시작해주세요.",409);
+        if(actor.role==="seller"&&!subscribed(actor)&&actor.credits<1){if(actor.trialProject||Date.now()-new Date(actor.createdAt).getTime()>3*86400000)throw new CommerceError("무료 체험을 이미 사용했습니다.",409);actor.trialProject=id;}
+        actor.projects.push(id);s.projectProducts[id]=supply.id;
+      });
+      const projects=await studioAccess(projects=>{if(!projects.some(item=>item.id===id))projects.unshift(project);});
+      return NextResponse.json({ok:true,projectId:id,project:projects.find(item=>item.id===id)||project,url:`/studio?project=${id}`});
     }
     const state=await commerceAccess(s=>{
       const actor=s.members.find(m=>m.id===member.id)!;
