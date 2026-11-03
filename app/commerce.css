@@ -15,7 +15,9 @@
 @media(max-width:600px){.fd-grow-visual{min-height:260px}.fd-dashboard-banner>img{opacity:.8}}
 
 /* Keep the original FRUIDAM artwork aligned in every service header. */
-.fd-header{padding-top:12px;padding-bottom:12px}
+.fd-header{padding-top:12px;padding-bottom:12px;position:sticky;top:0;z-index:80;background:#fff;box-shadow:0 2px 9px #203f3008}
+.fd-story .fs-section{scroll-margin-top:110px}
+@media(max-width:820px){.fd-header .fd-nav.open{top:100%}}
 @media(max-width:600px){.fd-header{padding-top:10px;padding-bottom:10px}}
 
 /* Supply registration and source product information. */

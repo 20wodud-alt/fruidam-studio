@@ -2,7 +2,7 @@
   position: relative;
   display: inline-block;
   flex-shrink: 0;
-  width: 128px;
+  width: 89.6px;
   aspect-ratio: 1311 / 641;
   overflow: hidden;
   vertical-align: middle;
@@ -20,9 +20,9 @@
   object-fit: fill;
 }
 
-.compact { width: 102px; }
+.compact { width: 71.4px; }
 
 @media (max-width: 600px) {
-  .logo { width: 104px; }
-  .compact { width: 92px; }
+  .logo { width: 72.8px; }
+  .compact { width: 64.4px; }
 }
