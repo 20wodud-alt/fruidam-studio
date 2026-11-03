@@ -18,9 +18,9 @@
 | 저장소 | https://github.com/20wodud-alt/fruidam-studio |
 | 작업 브랜치 | `codex/fruidam-seller-platform` |
 | 검토용 PR | https://github.com/20wodud-alt/fruidam-studio/pull/1 |
-| 최근 기능 코드 커밋 | `51dc835` — 상품 품종 배치·무료배송·출고 선택·숫자 쉼표 입력 |
-| 최근 운영 배포 | `dpl_AAA2WgNsWeQR39ioNjEVFiSd9WAH` |
-| 배포 고유 주소 | https://fruidam-studio-kxq819r86-20wodud.vercel.app |
+| 최근 기능 코드 커밋 | `fb010f2` — 열매담 이야기 소개 페이지·수확 이미지·상단 메뉴 |
+| 최근 운영 배포 | `dpl_3caw8JfdcWPrbULvALUpqWnuQ9vC` |
+| 배포 고유 주소 | https://fruidam-studio-zw7zy9npv-20wodud.vercel.app |
 | 배포 상태 | 2026-11-03 Vercel에서 Production / Ready 확인 |
 
 작업 브랜치의 코드로 CLI에서 직접 배포했다. main 병합과 Git 자동 배포 연결은 별도 작업이다. 문서 저장·커밋·푸시는 운영 사이트 재배포와 구분한다.
@@ -43,6 +43,7 @@
 ## 구현·배포한 기능
 
 - 홈, 공급상품 검색·분류·상세, 요금제, 회원가입·로그인.
+- `/about` 열매담 이야기: 전국 산지·농가·직매장과 셀러의 연결, 지역 상생·정직한 가격, 상세페이지 자동 생성부터 산지 직배송까지의 여정. 신규 AI 수확 브랜드 이미지와 선형 아이콘·모바일 화면, 상단 메뉴·푸터 링크와 입점·공급상품 버튼.
 - 셀러·공급처·운영자 대시보드.
 - 공급처 승인, 상품·옵션·사진·재고 등록, 상품 검수·승인·중단, 공급처 수수료율 설정.
 - 운영자의 상품 관리 화면에서 직접 등록·수정 및 승인 공급처 대리 등록. 빈 목록의 첫 상품 등록 버튼, 공급처 선택, 양식 내 오류 표시. 공급처의 기존 입점 승인과 일반 셀러 등록 제한은 유지한다.
