@@ -6,6 +6,8 @@ import { canOrder, orderLabels, plans, sampleProducts, subscribed, type Commerce
 import { studioAccess } from "@/lib/studio-store";
 import { emptyDesignBrief, generateSections, type Product, type StudioProject } from "@/lib/studio";
 import { createPendingOrder } from "@/lib/commerce-orders";
+import { supplyDetails } from "@/lib/commerce-product-details";
+import { optionName, supplyImages } from "@/lib/commerce";
 export const runtime="nodejs";
 export const dynamic="force-dynamic";
 const text=(value:unknown,max=200)=> typeof value==="string"?value.trim().slice(0,max):"";
@@ -29,7 +31,8 @@ export async function POST(request:Request){
       if(!subscribed(fresh)&&fresh.credits<1&&(fresh.trialProject||Date.now()-new Date(fresh.createdAt).getTime()>3*86400000))throw new CommerceError("무료 체험이 종료됐습니다. 이용권을 선택해주세요.",403);
       const supply=state.products.find(p=>p.id===input.productId&&p.status==="approved")||sampleProducts.find(p=>p.id===input.productId);
       if(!supply)throw new CommerceError("공급 상품을 선택해주세요.");
-      const id=randomUUID();const info:Product={name:supply.name,category:"식품 · 농수산물",features:`${supply.features}\n원산지: ${supply.origin}\n배송: ${supply.shipping}`,price:"",options:supply.options.map(o=>o.label).join("\n"),images:supply.image?[supply.image]:[],theme:"forest",length:"15",design:{...emptyDesignBrief,photoDirection:{mode:"original",people:false,instructions:"실제 상품 외관을 유지합니다."}}};
+      const extra=[supply.variety&&`품종: ${supply.variety}`,supply.productionYear&&`생산연도: ${supply.productionYear}년`,supply.storageType&&`보관구분: ${supply.storageType}`,supply.storageInstructions&&`보관안내: ${supply.storageInstructions}`,supply.dispatchType&&`출고형태: ${supply.dispatchType}`,supply.carrier&&`택배사: ${supply.carrier}`,supply.jejuSurcharge&&`제주 추가 배송비: ${supply.jejuSurcharge}원`,supply.remoteSurcharge&&`도서산간 추가 배송비: ${supply.remoteSurcharge}원`].filter(Boolean);
+      const id=randomUUID();const info:Product={name:supply.name,category:"식품 · 농수산물",features:[supply.features,`원산지: ${supply.origin}`,`배송: ${supply.shipping}`,...extra].join("\n").slice(0,3000),price:"",options:supply.options.map(optionName).join("\n").slice(0,2000),images:supplyImages(supply),theme:"forest",length:"15",design:{...emptyDesignBrief,photoDirection:{mode:"original",people:false,instructions:"실제 상품 외관을 유지합니다."}}};
       const project:StudioProject={id,product:info,sections:generateSections(info),starred:false,createdAt:new Date().toISOString(),updatedAt:new Date().toISOString(),supplyProductId:supply.id};
       await commerceAccess(s=>{const m=s.members.find(m=>m.id===member.id)!;if(!subscribed(m)&&m.credits<1){if(m.trialProject||Date.now()-new Date(m.createdAt).getTime()>3*86400000)throw new CommerceError("무료 체험을 이미 사용했습니다.",409);m.trialProject=id;}m.projects.push(id);s.projectProducts[id]=supply.id;});
       await studioAccess(projects=>{projects.unshift(project);});
@@ -45,11 +48,12 @@ export async function POST(request:Request){
         const supplier=s.members.find(m=>m.id===supplierId);
         if(!supplier || !(supplier.role==="admin" || (supplier.role==="supplier"&&supplier.approved)))throw new CommerceError("승인된 공급처를 선택해주세요.");
         const name=text(input.name,100),origin=text(input.origin,100),features=text(input.features,3000),shipping=text(input.shipping,200),image=text(input.image,1000),cutoff=text(input.cutoff,5);
-        if(!name||!origin||!features||!shipping||!/^\d{2}:\d{2}$/.test(cutoff))throw new CommerceError("필수 상품 정보와 주문 마감 시간을 입력해주세요.");
+        if(!name||!origin||!features||!shipping||!/^(?:[01]\d|2[0-3]):[0-5]\d$/.test(cutoff))throw new CommerceError("필수 상품 정보와 주문 마감 시간을 입력해주세요.");
         if(image&&!/^\/api\/uploads\/[a-f0-9-]+\.webp$/.test(image))throw new CommerceError("직접 업로드한 실제 상품 사진을 선택해주세요.");
-        const options:SupplyProduct["options"]=Array.isArray(input.options)?input.options.slice(0,20).map((o:{id?:string;label?:string;price?:number;stock?:number})=>({id:text(o.id)||randomUUID(),label:text(o.label,100),price:number(o.price,100,10000000),stock:number(o.stock,0,100000)})):[];
+        if(!Array.isArray(input.options)||input.options.length>20)throw new CommerceError("상품 옵션은 최대 20개까지 등록할 수 있습니다.");
+        const options:SupplyProduct["options"]=input.options.map((o:Record<string,unknown>)=>{if(!o||typeof o!=="object")throw new CommerceError("옵션 정보를 확인해주세요.");const details={label:o.customLabel===false?"":text(o.label,200),grade:text(o.grade,60),weight:text(o.weight,60),size:text(o.size,60),fruitCount:text(o.fruitCount,60)};return {id:text(o.id)||randomUUID(),...details,label:optionName(details).slice(0,200),customLabel:o.customLabel!==false,price:number(o.price,100,10000000),stock:number(o.stock,0,100000)};});
         if(!options.length||options.some(o=>!o.label)||new Set(options.map(o=>o.id)).size!==options.length)throw new CommerceError("상품 옵션을 확인해주세요.");
-        const next:SupplyProduct={id,supplierId:supplier.id,supplier:supplier.name,name,origin,features,shipping,image,cutoff,category:text(input.category,30)||"포도·기타",options,status:"pending",updatedAt:new Date().toISOString()};
+        const next:SupplyProduct={id,supplierId:supplier.id,supplier:supplier.name,name,origin,features,shipping,cutoff,category:text(input.category,30)||"포도·기타",options,...supplyDetails(input,existing),status:"pending",updatedAt:new Date().toISOString()};
         if(existing){s.products[s.products.indexOf(existing)]=next;for(const m of s.members)if(m.unlocked.includes(id)||m.projects.some(p=>s.projectProducts[p]===id))notice(s,m.id,"공급 조건 변경",`${name}의 공급 조건이 변경되어 검수 중입니다. 최신 내용을 확인해주세요.`);}else s.products.unshift(next);
       }else if(input.action==="approveSupplier"){
         if(actor.role!=="admin")throw new CommerceError("운영자만 처리할 수 있습니다.",403);

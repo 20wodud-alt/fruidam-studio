@@ -8,7 +8,7 @@ const require=createRequire(import.meta.url),sharp=require("sharp");
 const origin=process.env.FRUIDAM_TEST_ORIGIN||"http://127.0.0.1:3010";
 if(!/^http:\/\/(127\.0\.0\.1|localhost):\d+$/.test(origin))throw Error("Integration checks require a local server.");
 const base=process.env.SUPABASE_URL,key=process.env.SUPABASE_SECRET_KEY||process.env.SUPABASE_SERVICE_ROLE_KEY;
-const users=[],projects=new Set();let asset="";
+const users=[],projects=new Set();let asset="";const assets=[];
 const headers={apikey:key,Authorization:`Bearer ${key}`,"Content-Type":"application/json"};
 async function remote(endpoint,body,method){const r=await fetch(`${base}${endpoint}`,{method:method||(body===undefined?"GET":"POST"),headers,...(body===undefined?{}:{body:JSON.stringify(body)})});if(!r.ok)throw Error(`Fixture service request failed (${r.status})`);return r.status===204?null:r.json();}
 async function stateUpdate(update){const snapshot=await remote("/rest/v1/rpc/FRUIDAM_commerce_load",{});update(snapshot.document);await remote("/rest/v1/rpc/FRUIDAM_commerce_save",{next_document:snapshot.document,expected_revision:snapshot.revision});}
@@ -20,25 +20,28 @@ try{
   await stateUpdate(s=>{s.members.find(m=>m.id===admin.id).role="admin";});
   assert.equal((await api(seller.cookie,"/api/commerce",{action:"approveSupplier",id:supplier.id,commission:1250})).status,403,"seller cannot approve supplier");
   assert.equal((await api(admin.cookie,"/api/commerce",{action:"approveSupplier",id:supplier.id,commission:1250})).status,200);
-  const png=await sharp({create:{width:80,height:80,channels:3,background:"#c34030"}}).png().toBuffer();const upload=new FormData();upload.set("file",new File([png],"fixture.png",{type:"image/png"}));const uploadResponse=await fetch(`${origin}/api/uploads`,{method:"POST",headers:{Origin:origin,Cookie:supplier.cookie},body:upload});assert.equal(uploadResponse.status,200);asset=(await uploadResponse.json()).url;
-  const productInput={action:"supplierProduct",name:"자동검증 전용 상품",category:"사과·배",origin:"테스트 데이터",features:"자동 검증 후 삭제되는 공급상품",image:asset,cutoff:"12:00",shipping:"검증용 출고 안내",options:[{id:"fixture-option",label:"3kg",price:20000,stock:10}]};
+  const png=await sharp({create:{width:80,height:80,channels:3,background:"#c34030"}}).png().toBuffer();const upload=new FormData();upload.set("file",new File([png],"fixture.png",{type:"image/png"}));const uploadResponse=await fetch(`${origin}/api/uploads`,{method:"POST",headers:{Origin:origin,Cookie:supplier.cookie},body:upload});assert.equal(uploadResponse.status,200);asset=(await uploadResponse.json()).url;assets.push(asset);const secondUpload=await fetch(`${origin}/api/uploads`,{method:"POST",headers:{Origin:origin,Cookie:supplier.cookie},body:upload});assert.equal(secondUpload.status,200);assets.push((await secondUpload.json()).url);
+  const productInput={action:"supplierProduct",name:"자동검증 전용 상품",category:"사과·배",origin:"테스트 데이터",features:"자동 검증 후 삭제되는 공급상품",image:asset,images:assets,badge:"국내과일",variety:"부사",taxStatus:"tax_free",shippingLabel:"free",dispatchType:"센터",carrier:"CJ대한통운",productionYear:2026,storageType:"냉장보관",storageInstructions:"0~10도 냉장 보관",jejuSurcharge:3000,remoteSurcharge:6000,cutoff:"12:00",shipping:"검증용 출고 안내",options:[{id:"fixture-option",label:"3kg",price:20000,stock:10}]};
   assert.equal((await api(seller.cookie,"/api/commerce",productInput)).status,403,"seller cannot register supply products");
   const direct=await api(admin.cookie,"/api/commerce",{...productInput,name:"운영자 직접등록 검증 상품"});assert.equal(direct.status,200,"admin can register directly");
-  const directProduct=direct.data.products.find(p=>p.supplierId===admin.id);assert.ok(directProduct);assert.equal(directProduct.status,"pending","admin registration still requires product review");
+  const directProduct=direct.data.products.find(p=>p.supplierId===admin.id);assert.ok(directProduct);assert.equal(directProduct.status,"pending","admin registration still requires product review");assert.equal(directProduct.images.length,2);assert.equal(directProduct.taxStatus,"tax_free");assert.equal(directProduct.productionYear,2026);assert.equal(directProduct.jejuSurcharge,3000);assert.equal(directProduct.carrier,"CJ대한통운");
+  for(const invalid of [{taxStatus:"invalid"},{jejuSurcharge:-1},{productionYear:1900},{images:["https://example.invalid/photo.jpg"]},{cutoff:"25:99"}])assert.equal((await api(admin.cookie,"/api/commerce",{...productInput,...invalid})).status,400,"invalid metadata rejected");
+  const auto=await api(admin.cookie,"/api/commerce",{...productInput,name:"자동 옵션명 검증",options:[{id:"auto-option",label:"",customLabel:false,grade:"정품",weight:"2kg",size:"중소과",fruitCount:"13과 내외",price:8950,stock:10}]});assert.equal(auto.status,200);const autoProduct=auto.data.products.find(p=>p.name==="자동 옵션명 검증");assert.equal(autoProduct.options[0].label,"정품 2kg / 중소과 / 13과 내외");assert.equal(autoProduct.options[0].customLabel,false);
   assert.equal((await api(supplier.cookie,"/api/commerce",{...productInput,id:directProduct.id})).status,403,"supplier cannot edit admin product");
   const delegated=await api(admin.cookie,"/api/commerce",{...productInput,name:"공급처 대리등록 검증 상품",supplierId:supplier.id});assert.equal(delegated.status,200,"admin can register for approved supplier");
   const delegatedProduct=delegated.data.products.find(p=>p.name==="공급처 대리등록 검증 상품");assert.equal(delegatedProduct.supplierId,supplier.id);
   const edited=await api(admin.cookie,"/api/commerce",{...productInput,id:delegatedProduct.id,name:"공급처 대리수정 검증 상품"});assert.equal(edited.status,200);assert.equal(edited.data.products.find(p=>p.id===delegatedProduct.id).supplierId,supplier.id,"admin edit preserves supplier ownership");
+  const oldShape={action:"supplierProduct",id:delegatedProduct.id,name:"이전 양식 수정 검증",origin:productInput.origin,features:productInput.features,shipping:productInput.shipping,image:asset,cutoff:"12:00",options:productInput.options};const compatible=await api(admin.cookie,"/api/commerce",oldShape);assert.equal(compatible.status,200);const preserved=compatible.data.products.find(p=>p.id===delegatedProduct.id);assert.equal(preserved.images.length,2);assert.equal(preserved.taxStatus,"tax_free");assert.equal(preserved.storageInstructions,"0~10도 냉장 보관");
   const saved=await api(supplier.cookie,"/api/commerce",productInput);assert.equal(saved.status,200);const product=saved.data.products.find(p=>p.supplierId===supplier.id);assert.ok(product);assert.equal(product.status,"pending");
   assert.equal((await api(admin.cookie,"/api/commerce",{action:"approveProduct",id:product.id})).status,200);
   const created=await api(seller.cookie,"/api/commerce",{action:"createProject",productId:product.id});assert.equal(created.status,200);projects.add(created.data.projectId);
   assert.equal((await api(seller.cookie,"/api/commerce",{action:"createProject",productId:product.id})).status,403,"trial is one project");
-  const own=await api(seller.cookie,"/api/studio");assert.equal(own.status,200);assert.equal(own.data.length,1);assert.equal(own.data[0].id,created.data.projectId);
+  const own=await api(seller.cookie,"/api/studio");assert.equal(own.status,200);assert.equal(own.data.length,1);assert.equal(own.data[0].id,created.data.projectId);assert.equal(own.data[0].product.images.length,2);assert.ok(own.data[0].product.features.includes("냉장보관"));
   const foreign=await api(supplier.cookie,"/api/studio");assert.equal(foreign.data.length,0,"projects isolated by account");
   assert.equal((await api(seller.cookie,"/api/commerce/export",{projectId:created.data.projectId,mode:"check"})).status,403,"trial cannot download");
   assert.equal((await api(supplier.cookie,"/api/commerce/export",{projectId:created.data.projectId,mode:"check"})).status,403,"other account cannot export");
   assert.equal((await api(seller.cookie,"/api/ai-settings",{enabled:false})).status,403,"seller cannot modify shared AI settings");
-  const order={action:"createOrder",productId:product.id,optionId:"fixture-option",quantity:2,unitPrice:20000,recipient:"자동검증",phone:"01000000000",address:"자동 검증 전용 배송지 123",note:"실제 배송 금지"};
+  const order={action:"createOrder",productId:product.id,optionId:"fixture-option",quantity:2,unitPrice:20000,recipient:"자동검증",phone:"01000000000",address:"자동 검증 전용 배송지 123",note:"실제 배송 금지",shippingRegion:"mainland"};
   assert.equal((await api(seller.cookie,"/api/commerce",order)).status,403,"trial cannot order");
   await stateUpdate(s=>{s.members.find(m=>m.id===seller.id).unlocked.push(product.id);});
   assert.equal((await api(seller.cookie,"/api/commerce",{...order,unitPrice:1})).status,409,"tampered price rejected");
@@ -46,6 +49,7 @@ try{
   assert.equal((await api(seller.cookie,"/api/commerce",{action:"importOrders",rows:[order,{...order,phone:"bad"}]})).status,400,"invalid batch rejected");
   assert.equal((await api(seller.cookie,"/api/commerce")).data.orders.length,1,"invalid batch creates no partial orders");
   assert.equal((await api(seller.cookie,"/api/commerce",{action:"importOrders",rows:[order,order]})).status,200,"valid batch accepted");
+  const regional=await api(seller.cookie,"/api/commerce",{action:"importOrders",rows:[{...order,shippingRegion:"제주",shippingSurcharge:1}]});assert.equal(regional.status,200);assert.equal(regional.data.orders[0].shippingSurcharge,3000);assert.equal(regional.data.orders[0].amount,43000,"server calculates regional fee once, ignoring client amount");
   assert.notEqual((await api(supplier.cookie,"/api/commerce",{action:"orderStatus",id:placed.id,status:"paid"})).status,200,"manual status cannot fake payment");
   // Fixture-only paid order, without any real provider call.
   await stateUpdate(s=>{s.orders.find(o=>o.id===placed.id).status="paid";});
@@ -58,12 +62,12 @@ try{
   assert.equal((await api(admin.cookie,"/api/commerce",{action:"approveProduct",id:directProduct.id})).status,200);
   await stateUpdate(s=>{s.members.find(m=>m.id===seller.id).unlocked.push(directProduct.id);});
   assert.equal((await api(seller.cookie,"/api/commerce",{...order,productId:directProduct.id})).status,200,"admin-managed supply product supports order drafts");
-  console.log("PASS: real Auth login, role escalation prevention, supplier approval/product review, scoped studio, trial/export limits, price validation, order states, notifications and settlement records. No email, AI or payment calls.");
+  console.log("PASS: real Auth login, role escalation prevention, supplier approval/product review, scoped studio, trial/export limits, price validation, order states, notifications and settlement records. Extended product metadata/gallery, automatic option labels, legacy edits and regional shipping also verified. No email, AI or payment calls.");
 }finally{
   const ids=new Set(users);
   await stateUpdate(s=>{for(const m of s.members.filter(m=>ids.has(m.id)))for(const id of m.projects)projects.add(id);s.members=s.members.filter(m=>!ids.has(m.id));s.products=s.products.filter(p=>!ids.has(p.supplierId));s.orders=s.orders.filter(o=>!ids.has(o.sellerId)&&!ids.has(o.supplierId));s.claims=s.claims.filter(c=>!ids.has(c.sellerId)&&!ids.has(c.supplierId));s.notices=s.notices.filter(n=>!ids.has(n.memberId));s.purchases=s.purchases.filter(p=>!ids.has(p.memberId));for(const id of projects){delete s.projectProducts[id];delete s.downloads[id];delete s.imageUsage[id];}});
   const all=await remote("/rest/v1/rpc/FRUIDAM_load_projects",{});const deletions=all.filter(row=>projects.has(row.project.id)).map(row=>({id:row.project.id,expected_revision:row.revision}));if(deletions.length)await remote("/rest/v1/rpc/FRUIDAM_apply_changes",{changes:[],deletions});
-  if(asset)await remote("/storage/v1/object/fruidam-assets",{prefixes:[asset.split("/").at(-1)]},"DELETE");
+  if(assets.length)await remote("/storage/v1/object/fruidam-assets",{prefixes:assets.map(url=>url.split("/").at(-1))},"DELETE");
   for(const id of users)await remote(`/auth/v1/admin/users/${id}`,undefined,"DELETE");
   console.log("Disposable integration accounts and records cleaned up.");
 }
