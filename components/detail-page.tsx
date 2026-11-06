@@ -1,3 +1,4 @@
+import { BrandCover, brandCoverStyles } from "./brand-cover";
 import { skinStyles } from "@/lib/design-skins";
 import { Fragment } from "react";
 import { TextContent } from "./text-content";
@@ -21,6 +22,7 @@ ${fruitEditorialStyles}
 ${copyRhythmStyles}
 ${cardLayoutStyles}
 ${skinStyles}
+${brandCoverStyles}
 .product-page .dp-text-list{display:block;text-align:left}
 .product-page .dp-text-list>[role=listitem]{display:grid;grid-template-columns:auto minmax(0,1fr);gap:.5em;margin:.2em 0}
 .product-page .dp-list-marker{font-variant-numeric:tabular-nums;min-width:1em}
@@ -29,7 +31,7 @@ ${skinStyles}
 .product-page sup{font-size:.7em;line-height:0;vertical-align:super}
 
 `;
-export function DetailPage({ project, selected, onSelect, selectedElement, selectedElements, onSelectElement, onEditText, onInsertPage, onResizePage, onDeletePage }: { project: StudioProject; selected?: string; onSelect?: (id: string) => void; selectedElement?: string; selectedElements?: string[]; onDeletePage?:(id:string)=>void; onInsertPage?:(afterId:string,kind:InsertPageKind)=>void; onResizePage?:(id:string,height:number)=>void; onEditText?: (sectionId:string,target:string)=>void; onSelectElement?: (sectionId: string, elementId: string) => void }) {
+export function DetailPage({ includeBrandCover = true, project, selected, onSelect, selectedElement, selectedElements, onSelectElement, onEditText, onInsertPage, onResizePage, onDeletePage }: { includeBrandCover?: boolean; project: StudioProject; selected?: string; onSelect?: (id: string) => void; selectedElement?: string; selectedElements?: string[]; onDeletePage?:(id:string)=>void; onInsertPage?:(afterId:string,kind:InsertPageKind)=>void; onResizePage?:(id:string,height:number)=>void; onEditText?: (sectionId:string,target:string)=>void; onSelectElement?: (sectionId: string, elementId: string) => void }) {
   const { product, sections } = project; const theme = themes[product.theme];
   function target(section: Section, key: string) {
     if (!onSelectElement) return {};
@@ -51,7 +53,8 @@ export function DetailPage({ project, selected, onSelect, selectedElement, selec
     })}</div>;
   }
   return <div className={`product-page layout-${product.design?.layout || "editorial"}`} style={{ "--accent": theme.accent, "--light": theme.light } as React.CSSProperties}>
-    {onInsertPage && <PageBoundary afterId="" index={0} disabled={sections.length>=30} onInsert={onInsertPage}/>}
+    {includeBrandCover && project.supplyProductId && <BrandCover/>}
+      {onInsertPage && <PageBoundary afterId="" index={0} disabled={sections.length>=30} onInsert={onInsertPage}/>}
     {sections.filter(s => s.visible).map(section => {
       const titleAttributes = target(section, "title"), bodyAttributes = target(section, "body"), kickerAttributes = target(section, "kicker");
       const heading = <h2 {...titleAttributes} style={textCSS(section.format?.title)}>{section.presentation === "fruit-editorial" && section.kind !== "hero" ? section.title.split("\n").map((line,i,lines)=><span className="dp-heading-line" key={i}>{i===lines.length-1 ? <span className="dp-heading-emphasis"><TextContent text={line} format={section.format?.title}/></span> : <TextContent text={line} format={section.format?.title}/>}</span>) : <TextContent text={section.title} format={section.format?.title}/>}</h2>;
