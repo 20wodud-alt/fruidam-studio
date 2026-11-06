@@ -18,9 +18,9 @@
 | 저장소 | https://github.com/20wodud-alt/fruidam-studio |
 | 작업 브랜치 | `codex/fruidam-seller-platform` |
 | 검토용 PR | https://github.com/20wodud-alt/fruidam-studio/pull/1 |
-| 최근 기능 코드 커밋 | `62bacc5` — 당도 등급 배지를 붉은색 계열로 변경 |
-| 최근 운영 배포 | `dpl_ETynwogBNeLLHJ6pNnzGcHEPaKzv` |
-| 배포 고유 주소 | https://fruidam-studio-5kfvh1rdx-20wodud.vercel.app |
+| 최근 기능 코드 커밋 | `4dd41c1` — 열매담 브랜드 이야기·고정 상세페이지 표지 (`56c3259` 편집기 표지 메뉴 대비 보완) |
+| 최근 운영 배포 | `dpl_3rtQzL7C4FCXFjnQThoC61PARrcy` |
+| 배포 고유 주소 | https://fruidam-studio-astdc8acc-20wodud.vercel.app |
 | 배포 상태 | 2026-11-06 Vercel에서 Production / Ready 및 인증 보호 유지 확인 |
 
 작업 브랜치의 코드로 CLI에서 직접 배포했다. main 병합과 Git 자동 배포 연결은 별도 작업이다. 문서 저장·커밋·푸시는 운영 사이트 재배포와 구분한다.
@@ -96,3 +96,7 @@
 기존 프로젝트·사진·서버 비밀키는 원래 저장소와 서버 설정에 유지한다. GitHub에 비밀키를 포함하지 않는다. 임시 검증 계정과 테스트 데이터는 정리했다. 실행 중이던 로컬 확인 서버는 종료했다.
 
 최신 보존본은 상위 작업 폴더의 `열매담-현재진행상황-2026-11-06.md`, `열매담-작업기록-2026-11-06.md`, `fruidam-backup-2026-11-06.zip`이다. ZIP은 Git에서 추적하는 코드·문서의 스냅샷이며 운영 DB와 서버 환경변수 백업은 별도다. 이전 날짜 백업은 보존한다.
+
+## 공통 브랜드 아이덴티티 (11월 6일 추가)
+
+열매담 이야기(/about)에 산지 농가의 정성·온라인 연결·고객 식탁이라는 브랜드 약속을 추가했다. 녹색과 기존 로고를 활용한 동일한 공통 표지가 공급상품 연동 상세페이지 맨 앞에 고정된다. 기존 연동 프로젝트에도 자동 적용되며, 상품 편집·삭제·숨김·이동·AI 다듬기로 표지를 변경하지 않는다. 썸네일은 상품 페이지만 보여주고 JPG/PNG 긴 이미지와 HTML에는 브랜드 표지를 포함한다. 기존 단독 제작 프로젝트는 유지한다. 검증 상세는 11월 6일 인수인계 문서와 tests/brand-cover.cjs를 참고한다.
