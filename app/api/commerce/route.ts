@@ -10,7 +10,7 @@ import { supplyDetails } from "@/lib/commerce-product-details";
 
 import { supplyForProject, supplyProjectProduct, supplyProjectId } from "@/lib/supply-project";
 import { product as validateProduct } from "@/lib/validate-product";
-import { revokeSupplierApproval } from "@/lib/commerce-members";
+import { revokeSupplierApproval, updateSupplierApplication } from "@/lib/commerce-members";
 import { composeCopy } from "@/lib/ai-copywriter";
 import { fruitCompositionRequest } from "@/lib/fruit-composition";
 export const runtime="nodejs";
@@ -70,6 +70,8 @@ export async function POST(request:Request){
         if(!options.length||options.some(o=>!o.label)||new Set(options.map(o=>o.id)).size!==options.length)throw new CommerceError("상품 옵션을 확인해주세요.");
         const next:SupplyProduct={id,supplierId:supplier.id,supplier:supplier.name,name,origin,features,shipping,cutoff,category:text(input.category,30)||"포도·기타",options,...supplyDetails(input,existing),status:"pending",updatedAt:new Date().toISOString()};
         if(existing){s.products[s.products.indexOf(existing)]=next;for(const m of s.members)if(m.unlocked.includes(id)||m.projects.some(p=>s.projectProducts[p]===id))notice(s,m.id,"공급 조건 변경",`${name}의 공급 조건이 변경되어 검수 중입니다. 최신 내용을 확인해주세요.`);}else s.products.unshift(next);
+      }else if(input.action==="updateSupplierApplication"){
+        updateSupplierApplication(s,actor.id,input);
       }else if(input.action==="approveSupplier"){
         if(actor.role!=="admin")throw new CommerceError("운영자만 처리할 수 있습니다.",403);
         const target=s.members.find(m=>m.id===input.id&&m.role==="supplier");if(!target)throw new CommerceError("공급처를 찾지 못했습니다.");target.approved=true;target.commission=number(input.commission,0,10000);notice(s,target.id,"입점 승인 완료","상품을 등록하고 검수를 요청할 수 있습니다.");

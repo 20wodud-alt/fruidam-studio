@@ -2,6 +2,7 @@ import { cookies } from "next/headers";
 import { NextResponse } from "next/server";
 import { authRequest, currentMember, sameOrigin, sessionResponse } from "@/lib/commerce-auth";
 import { CommerceError } from "@/lib/commerce-store";
+import { validateSupplierApplication } from "@/lib/supplier-application";
 export const runtime="nodejs";
 export const dynamic="force-dynamic";
 export async function GET(){try{return NextResponse.json({member:await currentMember()},{headers:{"Cache-Control":"no-store"}});}catch{return NextResponse.json({member:null,error:"회원 서비스를 연결하지 못했습니다."},{status:503});}}
@@ -19,7 +20,8 @@ export async function POST(request:Request){
     if(!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)||email.length>254||password.length<10||password.length>128)throw new CommerceError("올바른 이메일과 10자 이상의 비밀번호를 입력해주세요.");
     if(input.action==="signup"){
       const name=typeof input.name==="string"?input.name.trim().slice(0,60):"";if(!name)throw new CommerceError("이름 또는 업체명을 입력해주세요.");
-      const data=await authRequest("signup",{email,password,data:{name,role:input.role==="supplier"?"supplier":"seller"}});
+      const supplierApplication=input.role==="supplier"&&input.supplierApplication!==undefined?validateSupplierApplication(input.supplierApplication):undefined;
+      const data=await authRequest("signup",{email,password,data:{name,role:input.role==="supplier"?"supplier":"seller",...(supplierApplication?{supplierApplication}:{})}});
       return sessionResponse(data,{ok:true,confirmationRequired:!data.access_token,message:data.access_token?"가입이 완료됐습니다.":"이메일로 받은 인증 링크를 확인한 후 로그인해주세요."});
     }
     if(input.action!=="login")throw new CommerceError("지원하지 않는 요청입니다.");

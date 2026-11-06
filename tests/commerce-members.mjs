@@ -2,11 +2,12 @@ import assert from "node:assert/strict";
 import { readFileSync } from "node:fs";
 import { createRequire } from "node:module";
 import vm from "node:vm";
+import path from "node:path";
 const require=createRequire(import.meta.url),ts=require("typescript");
 class CommerceError extends Error { constructor(message,status=400){super(message);this.status=status;} }
-const module={exports:{}};
-vm.runInNewContext(ts.transpileModule(readFileSync("lib/commerce-members.ts","utf8"),{compilerOptions:{module:ts.ModuleKind.CommonJS,target:ts.ScriptTarget.ES2022}}).outputText,{module,exports:module.exports,require:name=>name==="./commerce-store"?{CommerceError}:require(name)});
-const {registerCommerceMember,revokeSupplierApproval}=module.exports;
+const cache=new Map();
+function load(file){file=path.resolve(file);if(cache.has(file))return cache.get(file).exports;const module={exports:{}};cache.set(file,module);vm.runInNewContext(ts.transpileModule(readFileSync(file,"utf8"),{compilerOptions:{module:ts.ModuleKind.CommonJS,target:ts.ScriptTarget.ES2022}}).outputText,{module,exports:module.exports,require:name=>name==="./commerce-store"?{CommerceError}:name.startsWith(".")?load(path.resolve(path.dirname(file),name+".ts")):require(name)});return module.exports;}
+const {registerCommerceMember,revokeSupplierApproval,updateSupplierApplication}=load("lib/commerce-members.ts");
 const fixture=()=>({members:[{id:"admin",role:"admin"},{id:"reserved",name:"Farm",email:"supplier@example.invalid",role:"supplier",approved:true,awaitingSignup:true,commission:1000,projects:[],unlocked:[],credits:0}],products:[{id:"product",supplierId:"reserved",status:"approved"},{id:"draft",supplierId:"reserved",status:"pending"}],orders:[{id:"order",supplierId:"reserved",status:"delivered",amount:33000,settledAt:"2026-11-01"}],claims:[{supplierId:"reserved"}],notices:[{memberId:"reserved",title:"old"}]});
 const verified={id:"auth-supplier",email:"supplier@example.invalid",email_confirmed_at:"2026-11-03",created_at:"2026-11-03",user_metadata:{name:"Ignored",role:"admin"}};
 let state=fixture();const before=JSON.stringify(state);
@@ -24,3 +25,13 @@ assert.equal(member.approved,false);assert.equal(state.products[0].status,"pause
 const count=state.notices.length;revokeSupplierApproval(state,"admin",verified.id);assert.equal(state.notices.length,count,"revocation is idempotent");
 assert.throws(()=>revokeSupplierApproval(state,"admin","admin"),error=>error.status===404);
 console.log("PASS: verified supplier enrollment, ownership preservation, role restrictions and approval revocation.");
+const application={businessType:"farm",representative:"검증 대표",phone:"010-1234-5678",address:"검증용 주소",businessNumber:"123-45-67890",mainProducts:"사과",introduction:"농가 소개"};
+state=fixture();const original=JSON.stringify(state);
+assert.throws(()=>updateSupplierApplication(state,"reserved",{id:"reserved",name:"변경",supplierApplication:application}),e=>e.status===403);assert.equal(JSON.stringify(state),original);
+assert.throws(()=>updateSupplierApplication(state,"admin",{id:"admin",name:"변경",supplierApplication:application}),e=>e.status===404);
+assert.throws(()=>updateSupplierApplication(state,"admin",{id:"reserved",name:"변경",supplierApplication:{...application,phone:"bad"}}),e=>e.status===400);assert.equal(JSON.stringify(state),original,"validation precedes all edits");
+updateSupplierApplication(state,"admin",{id:"reserved",name:" 수정 농가 ",supplierApplication:application,email:"attacker@example.invalid",role:"admin",approved:false,commission:0,projects:["foreign"]});
+assert.equal(state.members[1].name,"수정 농가");assert.equal(state.members[1].supplierApplication.phone,application.phone);assert.ok(state.members[1].supplierApplication.updatedAt);assert.equal(state.products[0].supplier,"수정 농가");assert.equal(state.products[0].status,"approved");assert.equal(state.members[1].email,"supplier@example.invalid");assert.equal(state.members[1].role,"supplier");assert.equal(state.members[1].approved,true);assert.equal(state.members[1].commission,1000);assert.equal(state.members[1].projects.length,0);assert.equal(state.orders[0].amount,33000);
+const enrolled=registerCommerceMember(fixture(),{...verified,user_metadata:{name:"Farm",role:"supplier",supplierApplication:application}});assert.equal(enrolled.supplierApplication.mainProducts,"사과");
+assert.equal(registerCommerceMember(state,{...verified,user_metadata:{role:"supplier",supplierApplication:{...application,mainProducts:"덮어쓰기"}}}).supplierApplication.mainProducts,"사과","admin edits survive reserved-account enrollment");
+console.log("PASS: admin-only application edits, field validation, enrollment persistence, supplier name propagation and protected account/approval/commission/order fields.");

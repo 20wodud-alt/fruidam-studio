@@ -1,8 +1,9 @@
 import { randomUUID } from "node:crypto";
 import type { CommerceState } from "./commerce";
 import { CommerceError } from "./commerce-store";
+import { validateSupplierApplication } from "./supplier-application";
 
-type AuthMember = { id:string; email:string; email_confirmed_at?:string; created_at:string; user_metadata?:Record<string,string> };
+type AuthMember = { id:string; email:string; email_confirmed_at?:string; created_at:string; user_metadata?:Record<string,unknown> };
 
 // Only server-provisioned supplier profiles may be claimed, after email verification.
 export function registerCommerceMember(state:CommerceState,user:AuthMember){
@@ -12,6 +13,7 @@ export function registerCommerceMember(state:CommerceState,user:AuthMember){
   if(pending){
     if(!user.email_confirmed_at)throw new CommerceError("이메일 인증 후 입점 계정을 이용해주세요.",403);
     const previousId=pending.id;
+    if(!pending.supplierApplication&&user.user_metadata?.supplierApplication)pending.supplierApplication=validateSupplierApplication(user.user_metadata.supplierApplication);
     pending.id=user.id;delete pending.awaitingSignup;
     for(const product of state.products)if(product.supplierId===previousId)product.supplierId=user.id;
     for(const order of state.orders)if(order.supplierId===previousId)order.supplierId=user.id;
@@ -19,8 +21,18 @@ export function registerCommerceMember(state:CommerceState,user:AuthMember){
     for(const notice of state.notices)if(notice.memberId===previousId)notice.memberId=user.id;
     return pending;
   }
-  const member={id:user.id,email:user.email,name:(user.user_metadata?.name||user.email.split("@")[0]).slice(0,60),role:user.user_metadata?.role==="supplier"?"supplier" as const:"seller" as const,createdAt:user.created_at,approved:false,commission:0,credits:0,unlocked:[],projects:[]};
+  const member={id:user.id,email:user.email,name:(typeof user.user_metadata?.name==="string"?user.user_metadata.name:user.email.split("@")[0]).slice(0,60),role:user.user_metadata?.role==="supplier"?"supplier" as const:"seller" as const,createdAt:user.created_at,approved:false,commission:0,credits:0,unlocked:[],projects:[],...(user.user_metadata?.role==="supplier"&&user.user_metadata?.supplierApplication?{supplierApplication:validateSupplierApplication(user.user_metadata.supplierApplication)}:{})};
   state.members.push(member);return member;
+}
+
+export function updateSupplierApplication(state:CommerceState,actorId:string,input:Record<string,unknown>){
+  if(state.members.find(member=>member.id===actorId)?.role!=="admin")throw new CommerceError("운영자만 입점 정보를 수정할 수 있습니다.",403);
+  const supplier=state.members.find(member=>member.id===input.id&&member.role==="supplier");
+  if(!supplier)throw new CommerceError("공급처를 찾지 못했습니다.",404);
+  if(typeof input.name!=="string"||!input.name.trim()||input.name.trim().length>60)throw new CommerceError("농가·직매장 이름을 60자 이내로 입력해주세요.");
+  const application=validateSupplierApplication(input.supplierApplication);
+  supplier.name=input.name.trim();supplier.supplierApplication={...application,updatedAt:new Date().toISOString()};
+  for(const product of state.products)if(product.supplierId===supplier.id)product.supplier=supplier.name;
 }
 
 export function revokeSupplierApproval(state:CommerceState,actorId:string,supplierId:string){
