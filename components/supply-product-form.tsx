@@ -8,6 +8,7 @@ import { OriginPicker } from "@/components/origin-picker";
 import { FormattedNumberInput } from "@/components/formatted-number-input";
 
 type Props={product:SupplyProduct|null;busy:boolean;serverError?:string;suppliers?:Member[];defaultSupplierId?:string;operator?:boolean;onSubmit:(payload:Record<string,unknown>)=>Promise<void>};
+const gradeOptions=["특급","상","중","하"];
 export function SupplyProductForm({product,busy,onSubmit,serverError,suppliers,defaultSupplierId,operator=false}:Props){
   const [images,setImages]=useState<string[]>(product?supplyImages(product):[]);
   const [uploading,setUploading]=useState(false),[error,setError]=useState("");
@@ -50,10 +51,10 @@ export function SupplyProductForm({product,busy,onSubmit,serverError,suppliers,d
       <div className="fd-form-row"><label>주문 마감 시간<input type="time" name="cutoff" required defaultValue={product?.cutoff||"12:00"}/></label><label>출고 예정·배송 안내<input name="shipping" required maxLength={200} defaultValue={product?.shipping} placeholder="예: 평일 주문 다음 영업일 출고"/></label></div>
     </fieldset>
     <fieldset disabled={busy}><legend>옵션별 구성·공급가·재고</legend>
-      <p className="fd-caption">등급·중량·크기·과수를 입력하면 옵션명을 자동으로 구성합니다. 직접 입력한 옵션명이 있으면 우선 사용합니다.</p>
+      <p className="fd-caption">등급(당도)·중량·크기·과수를 입력하면 옵션명을 자동으로 구성합니다. 직접 입력한 옵션명이 있으면 우선 사용합니다.</p>
       {options.map((option,index)=><section className="fd-option-editor" key={option.id}>
         <div className="fd-between"><strong>옵션 {index+1}</strong><button type="button" className="fd-text-link" disabled={options.length===1} aria-label={`옵션 ${index+1} 삭제`} onClick={()=>setOptions(items=>items.filter((_,i)=>i!==index))}><X size={14}/>삭제</button></div>
-        <div className="fd-form-row"><label>등급<input value={option.grade||""} maxLength={60} placeholder="예: 정품" onChange={e=>change(index,{grade:e.target.value})}/></label><label>중량<input value={option.weight||""} maxLength={60} placeholder="예: 2kg" onChange={e=>change(index,{weight:e.target.value})}/></label></div>
+        <div className="fd-form-row"><label>등급(당도)<select value={option.grade||""} onChange={e=>change(index,{grade:e.target.value})}><option value="">선택해주세요</option>{option.grade&&!gradeOptions.includes(option.grade)&&<option value={option.grade} hidden>기존 값: {option.grade}</option>}{gradeOptions.map(grade=><option key={grade} value={grade}>{grade}</option>)}</select></label><label>중량<input value={option.weight||""} maxLength={60} placeholder="예: 2kg" onChange={e=>change(index,{weight:e.target.value})}/></label></div>
         <div className="fd-form-row"><label>크기·규격<input value={option.size||""} maxLength={60} placeholder="예: 중소과" onChange={e=>change(index,{size:e.target.value})}/></label><label>과수·개수<input value={option.fruitCount||""} maxLength={60} placeholder="예: 13과 내외" onChange={e=>change(index,{fruitCount:e.target.value})}/></label></div>
         <label>옵션명 (직접 지정)<input value={option.label} maxLength={200} placeholder="비워두면 위 구성으로 자동 생성" onChange={e=>change(index,{label:e.target.value})}/></label>
         <div className="fd-form-row"><label>배송비 포함 공급가<FormattedNumberInput initialValue={option.price} min={100} max={10000000} required onValueChange={price=>change(index,{price})}/></label><label>출고 가능 수량<FormattedNumberInput initialValue={option.stock} max={100000} required onValueChange={stock=>change(index,{stock})}/></label></div>
