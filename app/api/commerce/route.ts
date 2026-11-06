@@ -68,8 +68,12 @@ export async function POST(request:Request){
         if(!Array.isArray(input.options)||input.options.length>20)throw new CommerceError("상품 옵션은 최대 20개까지 등록할 수 있습니다.");
         const options:SupplyProduct["options"]=input.options.map((o:Record<string,unknown>)=>{if(!o||typeof o!=="object")throw new CommerceError("옵션 정보를 확인해주세요.");const details={label:o.customLabel===false?"":text(o.label,200),grade:text(o.grade,60),weight:text(o.weight,60),size:text(o.size,60),fruitCount:text(o.fruitCount,60)};return {id:text(o.id)||randomUUID(),...details,label:optionName(details).slice(0,200),customLabel:o.customLabel!==false,price:number(o.price,100,10000000),stock:number(o.stock,0,100000)};});
         if(!options.length||options.some(o=>!o.label)||new Set(options.map(o=>o.id)).size!==options.length)throw new CommerceError("상품 옵션을 확인해주세요.");
-        const next:SupplyProduct={id,supplierId:supplier.id,supplier:supplier.name,name,origin,features,shipping,cutoff,category:text(input.category,30)||"포도·기타",options,...supplyDetails(input,existing),status:"pending",updatedAt:new Date().toISOString()};
-        if(existing){s.products[s.products.indexOf(existing)]=next;for(const m of s.members)if(m.unlocked.includes(id)||m.projects.some(p=>s.projectProducts[p]===id))notice(s,m.id,"공급 조건 변경",`${name}의 공급 조건이 변경되어 검수 중입니다. 최신 내용을 확인해주세요.`);}else s.products.unshift(next);
+        const details=supplyDetails(input,existing);
+        // An operator editing an already reviewed product keeps its visibility.
+        // New products, supplier edits and a changed supplier still need review.
+        const status=actor.role==="admin"&&existing&&existing.supplierId===supplier.id&&(existing.status!=="approved"||details.image)?existing.status:"pending";
+        const next:SupplyProduct={id,supplierId:supplier.id,supplier:supplier.name,name,origin,features,shipping,cutoff,category:text(input.category,30)||"포도·기타",options,...details,status,updatedAt:new Date().toISOString()};
+        if(existing){s.products[s.products.indexOf(existing)]=next;for(const m of s.members)if(m.unlocked.includes(id)||m.projects.some(p=>s.projectProducts[p]===id))notice(s,m.id,"공급 조건 변경",next.status==="pending"?`${name}의 공급 조건이 변경되어 검수 중입니다. 최신 내용을 확인해주세요.`:`${name}의 공급 조건이 변경되었습니다. 최신 내용을 확인해주세요.`);}else s.products.unshift(next);
       }else if(input.action==="updateSupplierApplication"){
         updateSupplierApplication(s,actor.id,input);
       }else if(input.action==="approveSupplier"){

@@ -7,8 +7,8 @@ import { prepareImageUpload } from "@/lib/client-upload";
 import { OriginPicker } from "@/components/origin-picker";
 import { FormattedNumberInput } from "@/components/formatted-number-input";
 
-type Props={product:SupplyProduct|null;busy:boolean;serverError?:string;suppliers?:Member[];defaultSupplierId?:string;onSubmit:(payload:Record<string,unknown>)=>Promise<void>};
-export function SupplyProductForm({product,busy,onSubmit,serverError,suppliers,defaultSupplierId}:Props){
+type Props={product:SupplyProduct|null;busy:boolean;serverError?:string;suppliers?:Member[];defaultSupplierId?:string;operator?:boolean;onSubmit:(payload:Record<string,unknown>)=>Promise<void>};
+export function SupplyProductForm({product,busy,onSubmit,serverError,suppliers,defaultSupplierId,operator=false}:Props){
   const [images,setImages]=useState<string[]>(product?supplyImages(product):[]);
   const [uploading,setUploading]=useState(false),[error,setError]=useState("");
   const [options,setOptions]=useState<SupplyOption[]>(product?.options.map(option=>({...option,label:option.customLabel===false?"":option.label}))||[{id:crypto.randomUUID(),label:"",price:0,stock:0}]);
@@ -62,7 +62,7 @@ export function SupplyProductForm({product,busy,onSubmit,serverError,suppliers,d
       <button type="button" className="fd-button outline" disabled={options.length>=20} onClick={()=>setOptions(items=>[...items,{id:crypto.randomUUID(),label:"",price:0,stock:0}])}><Plus size={15}/>옵션 추가 ({options.length}/20)</button>
     </fieldset>
     {(error||serverError)&&<p className="fd-form-error" role="alert">{error||serverError}</p>}
-    <p className="fd-caption">등록·수정한 상품은 검수 후 공개됩니다. 과세 여부·생산연도·보관 정보는 입력한 내용을 그대로 안내합니다.</p>
-    <button className="fd-button" disabled={busy||uploading}>{busy||uploading?<LoaderCircle className="spin" size={17}/>:<Check size={17}/>}상품 검수 요청</button>
+    <p className="fd-caption">{operator&&product?"운영자가 수정하는 기존 상품은 판매 상태를 유지합니다. 공급처를 변경하거나 사진을 모두 삭제하면 다시 검수합니다.":"등록·수정한 상품은 검수 후 공개됩니다."} 과세 여부·생산연도·보관 정보는 입력한 내용을 그대로 안내합니다.</p>
+    <button className="fd-button" disabled={busy||uploading}>{busy||uploading?<LoaderCircle className="spin" size={17}/>:<Check size={17}/>} {operator&&product?"상품 수정 저장":"상품 검수 요청"}</button>
   </form>;
 }
