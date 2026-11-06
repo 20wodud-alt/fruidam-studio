@@ -23,6 +23,8 @@
 .outline-studio .composer-mic.active svg {
   color: #ffffff;
 }
+.outline-studio .os-pages .os-brand-cover-link > span {color:#f5f1e6}
+.outline-studio .os-pages .os-brand-cover-link > small {color:#d1d8bf}
 .outline-studio .composer-mic.active {background: var(--editor-accent)}
 .outline-studio .os-voice-composer.listening {border-color: var(--editor-accent);box-shadow:0 0 0 2px #426c4c10}
 .outline-studio .voice-wave i {background: var(--editor-accent)}
