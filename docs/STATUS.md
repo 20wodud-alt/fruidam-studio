@@ -18,10 +18,10 @@
 | 저장소 | https://github.com/20wodud-alt/fruidam-studio |
 | 작업 브랜치 | `codex/fruidam-seller-platform` |
 | 검토용 PR | https://github.com/20wodud-alt/fruidam-studio/pull/1 |
-| 최근 기능 코드 커밋 | `faff9f9` — 상세페이지 전체를 긴 JPG/PNG 파일 1개로 다운로드 |
-| 최근 운영 배포 | `dpl_6L232ZKK2k4xWfDR9DPpEnLtDLzB` |
-| 배포 고유 주소 | https://fruidam-studio-jnl2d9bai-20wodud.vercel.app |
-| 배포 상태 | 2026-11-03 Vercel에서 Production / Ready 확인 |
+| 최근 기능 코드 커밋 | `bd699f0` — 운영자의 농가 입점 신청 조회·수정, 새 신청 정보 저장 |
+| 최근 운영 배포 | `dpl_7QiJ6nMAmHo5mVKYg6SR7uKg5vyD` |
+| 배포 고유 주소 | https://fruidam-studio-dprf6dofd-20wodud.vercel.app |
+| 배포 상태 | 2026-11-06 Vercel에서 Production / Ready 및 인증 보호 유지 확인 |
 
 작업 브랜치의 코드로 CLI에서 직접 배포했다. main 병합과 Git 자동 배포 연결은 별도 작업이다. 문서 저장·커밋·푸시는 운영 사이트 재배포와 구분한다.
 

@@ -35,3 +35,5 @@
 - [전체 기획](commerce-spec.md)
 - [이전 결정 요약](session-handoff-2026-11-04.md)
 - [11월 3일 상세 기록](session-handoff-2026-11-03.md)
+
+운영 배포: 2026-11-06 `bd699f0`, `dpl_7QiJ6nMAmHo5mVKYg6SR7uKg5vyD` Production/Ready 및 https://fruidam-studio.vercel.app 연결 확인. Vercel 인증 보호 유지.
