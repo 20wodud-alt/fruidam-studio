@@ -4,7 +4,7 @@
 
 ## 바로 이어서 작업할 때
 
-최신 저장 요청에 따라 기획서·진행 상황·11월 6일 작업 기록을 함께 정리했다. 기능 코드 `4dd41c1`·`56c3259`와 배포 기록 `7e34477`는 GitHub에 저장되어 있다. 이번 저장은 최신 합의와 인수인계 문서를 갱신하는 작업이다.
+11월 10일 공개·회원 승인 정책을 적용했다. 아래 현재 상태와 최신 11월 10일 기록을 기준으로 작업을 이어간다. 이전 브랜드 표지·상품 관리 기록은 11월 6일 문서에 보존한다.
 
 1. 저장소의 `AGENTS.md`를 확인한다.
 2. 이 문서로 현재 상태를 확인한다.
@@ -20,10 +20,10 @@
 | 저장소 | https://github.com/20wodud-alt/fruidam-studio |
 | 작업 브랜치 | `codex/fruidam-seller-platform` |
 | 검토용 PR | https://github.com/20wodud-alt/fruidam-studio/pull/1 |
-| 최근 기능 코드 커밋 | `4dd41c1` — 열매담 브랜드 이야기·고정 상세페이지 표지 (`56c3259` 편집기 표지 메뉴 대비 보완) |
-| 최근 운영 배포 | `dpl_3rtQzL7C4FCXFjnQThoC61PARrcy` |
-| 배포 고유 주소 | https://fruidam-studio-astdc8acc-20wodud.vercel.app |
-| 배포 상태 | 2026-11-06 Vercel에서 Production / Ready 및 인증 보호 유지 확인 |
+| 최근 기능 코드 커밋 | `bf492c5` — 기본 화면 공개·승인 회원 전용 상품 상세/가격/스튜디오 및 셀러 승인 관리 |
+| 최근 운영 배포 | `dpl_EwqGPy1F9sosfoK2ZSdjb8ELiWDk` |
+| 배포 고유 주소 | https://fruidam-studio-3gr55j9ft-20wodud.vercel.app |
+| 배포 상태 | 2026-11-10 Production / Ready. 운영 도메인 공개, 생성 배포/미리보기 인증 보호 유지 확인 |
 
 작업 브랜치의 코드로 CLI에서 직접 배포했다. main 병합과 Git 자동 배포 연결은 별도 작업이다. 문서 저장·커밋·푸시는 운영 사이트 재배포와 구분한다.
 
