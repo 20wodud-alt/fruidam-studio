@@ -23,6 +23,7 @@ export async function authUser() {
 }
 export async function currentMember(): Promise<Member | null> {
   const user = await authUser(); if (!user) return null;
+  if(!user.email_confirmed_at)throw new CommerceError("이메일 인증 후 로그인해주세요.",403);
   let state = await commerceAccess(); let member = state.members.find(m=>m.id===user.id);
   if (!member) {
     state = await commerceAccess(s=>{registerCommerceMember(s,user);});

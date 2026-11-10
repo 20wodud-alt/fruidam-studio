@@ -1,9 +1,10 @@
+import { withApiAccess } from "@/lib/api-access";
 import { NextResponse } from "next/server";
 import { normalizeGeminiModel, readAISettings, validateGeminiKey } from "@/lib/ai-settings";
 import { verifyGeminiConnection } from "@/lib/gemini-client";
 import { currentMember } from "@/lib/commerce-auth";
 export const runtime = "nodejs";
-export async function POST(request: Request) {
+async function handlePOST(request: Request) {
   const member=await currentMember();if(member&&member.role!=="admin")return NextResponse.json({error:"연결 확인은 운영자가 진행합니다."},{status:403});
   try {
     const origin = request.headers.get("origin");
@@ -15,3 +16,5 @@ export async function POST(request: Request) {
     return NextResponse.json({ok:true,...verified,message:"API 키와 모델 접근을 확인했어요. 문구 생성·검색의 할당량은 실제 요청 시 적용됩니다."});
   } catch(e) { return NextResponse.json({error:e instanceof Error ? e.name === "TimeoutError" ? "Gemini 연결 확인 시간이 초과됐어요. 다시 시도해주세요." : e.message : "연결을 확인하지 못했어요."},{status:400}); }
 }
+
+export const POST=withApiAccess(handlePOST,"admin");

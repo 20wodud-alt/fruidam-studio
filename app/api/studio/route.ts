@@ -1,3 +1,4 @@
+import { withApiAccess } from "@/lib/api-access";
 import { image, product, text } from "@/lib/validate-product";
 import { validateCopyAudit } from "@/lib/copy-audit";
 import { imageScenes } from "@/lib/image-plan";
@@ -11,11 +12,11 @@ import { validateElements, validateSectionFormat } from "@/lib/validate-element-
 import { currentMember } from "@/lib/commerce-auth";
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
-export async function GET() {
+async function handleGET() {
   try { return NextResponse.json((await studioAccess()).map(project => ({ ...project, product: { ...project.product, length: normalizeSectionLength(project.product.length) } })), { headers: { "X-Fruidam-Storage": storageProvider(), "Cache-Control": "no-store" } }); }
   catch (error) { return NextResponse.json({ error: error instanceof StudioStorageError ? error.message : "작업을 불러오지 못했어요." }, { status: error instanceof StudioStorageError ? error.status : 500 }); }
 }
-export async function POST(request: Request) {
+async function handlePOST(request: Request) {
   try {
     const origin = request.headers.get("origin"); if (origin && new URL(origin).host !== request.headers.get("host")) return NextResponse.json({ error: "Invalid origin" }, { status: 403 });
     const input = await request.json();
@@ -53,3 +54,6 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: storage ? "로컬 파일 저장에 실패했어요. 다시 시도해주세요." : error instanceof Error ? error.message : "요청을 처리하지 못했어요." }, { status: storage ? 500 : 400 });
   }
 }
+
+export const GET=withApiAccess(handleGET);
+export const POST=withApiAccess(handlePOST);

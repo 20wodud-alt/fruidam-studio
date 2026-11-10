@@ -1,7 +1,8 @@
+import { withApiAccess } from "@/lib/api-access";
 import { NextResponse } from "next/server";
 import ExcelJS from "exceljs";
 export const runtime = "nodejs";
-export async function POST(request: Request) {
+async function handlePOST(request: Request) {
   try {
     if (Number(request.headers.get("content-length")) > 2.2 * 1024 * 1024) return NextResponse.json({ error: "문서 파일은 2MB 이하로 첨부해주세요." }, { status: 413 });
     const data = await request.formData(); const file = data.get("file");
@@ -30,3 +31,5 @@ export async function POST(request: Request) {
     return NextResponse.json({ text: content.trim().slice(0, 12000), name: file.name.slice(0, 200), truncated: content.trim().length > 12000 });
   } catch (error) { return NextResponse.json({ error: error instanceof Error ? error.message : "문서를 읽지 못했어요." }, { status: 400 }); }
 }
+
+export const POST=withApiAccess(handlePOST);

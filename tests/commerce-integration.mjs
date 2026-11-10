@@ -26,6 +26,14 @@ try{
   const guest=await api(null,"/api/commerce");assert.equal(guest.status,200);assert.equal(guest.data.member,null);assert.equal(guest.data.orders.length,0);assert.equal(guest.data.members.length,0);
   const seller=await account("seller"),supplier=await account("supplier"),admin=await account("admin");
   await stateUpdate(s=>{s.members.find(m=>m.id===admin.id).role="admin";});
+  const privateRoutes=[['/api/studio'],['/api/ai-settings'],['/api/nongsaro-settings'],['/api/nongsaro'],['/api/photos?projectId=missing'],['/api/studio',{action:'save'}],['/api/studio/create',{}],['/api/studio/compose',{}],['/api/assistant',{}],['/api/copy-audit',{}],['/api/generate-image',{}],['/api/image-tools',{}],['/api/import-text',{}],['/api/uploads',{}],['/api/ai-settings',{}],['/api/ai-settings/test',{}],['/api/nongsaro-settings',{}],['/api/commerce/export',{}],['/api/commerce/product-draft?productId=missing']];
+  for(const [route,body] of privateRoutes){assert.equal((await api(null,route,body)).status,401,'anonymous blocked: '+route);assert.equal((await api(seller.cookie,route,body)).status,403,'pending member blocked: '+route);}
+  assert.equal((await api(seller.cookie,'/api/commerce',{action:'approveSeller',id:seller.id})).status,403,'cannot approve self');
+  assert.equal((await api(admin.cookie,'/api/commerce',{action:'approveSeller',id:seller.id})).status,200);
+  assert.equal((await api(seller.cookie,'/api/ai-settings',{})).status,403,'approved seller cannot change AI settings');
+  assert.equal((await api(admin.cookie,'/api/commerce',{action:'revokeSellerApproval',id:seller.id})).status,200);
+  assert.equal((await api(seller.cookie,'/api/studio')).status,403,'revocation affects active session');
+  assert.equal((await api(admin.cookie,'/api/commerce',{action:'approveSeller',id:seller.id})).status,200);
   const supplierBefore=(await api(supplier.cookie,"/api/account")).data.member;assert.equal(supplierBefore.supplierApplication.introduction,"신청시 작성한 소개","supplier signup metadata persists into enrollment");
   const applicationEdit={action:"updateSupplierApplication",id:supplier.id,name:"검증 농가 수정",supplierApplication:{businessType:"farm",representative:"변경 대표",phone:"010-1234-5678",address:"검증 전용 주소",businessNumber:"123-45-67890",mainProducts:"사과·감귤",introduction:"운영자 수정 내용"}};
   assert.equal((await api(null,"/api/commerce",applicationEdit)).status,401);assert.equal((await api(seller.cookie,"/api/commerce",applicationEdit)).status,403);assert.equal((await api(supplier.cookie,"/api/commerce",applicationEdit)).status,403);
@@ -70,6 +78,9 @@ try{
   assert.equal((await api(admin.cookie,`/api/commerce/product-draft?productId=${product.id}`)).status,200,"admin can import pending registered products");
   assert.equal((await api(seller.cookie,"/api/account")).data.member.trialProject,undefined,"prefill does not reserve trial usage");assert.equal((await api(supplier.cookie,"/api/account")).data.member.projects.length,0,"prefill does not create projects");
   assert.equal((await api(admin.cookie,"/api/commerce",{action:"approveProduct",id:product.id})).status,200);
+  const publicSnapshot=await api(null,'/api/commerce');const teaser=publicSnapshot.data.products.find(p=>p.id===product.id);assert.ok(teaser);assert.deepEqual(teaser.options,[]);assert.equal(teaser.features,'');assert.equal(teaser.images,undefined);assert.equal(teaser.jejuSurcharge,undefined);
+  const privateSnapshot=await api(seller.cookie,'/api/commerce');assert.ok(privateSnapshot.data.products.find(p=>p.id===product.id).options[0].price>0,'approved seller sees supply prices without needing a paid credit');
+  assert.equal((await fetch(origin+assets[0])).status,200,'public main thumbnail available');assert.equal((await fetch(origin+assets[1])).status,401,'private gallery image requires approval');
   const created=await api(seller.cookie,"/api/commerce",{action:"createProject",productId:product.id});assert.equal(created.status,200);projects.add(created.data.projectId);
   assert.equal((await api(seller.cookie,"/api/commerce",{action:"createProject",productId:product.id})).status,403,"trial is one project");
   const own=await api(seller.cookie,"/api/studio");assert.equal(own.status,200);assert.equal(own.data.length,1);assert.equal(own.data[0].id,created.data.projectId);assert.equal(own.data[0].product.images.length,2);assert.equal(own.data[0].product.features,product.features,"default source project keeps only the registered feature text");

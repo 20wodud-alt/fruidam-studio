@@ -1,3 +1,4 @@
+import { approvedAccess } from "./member-access";
 import { optionName, sampleProducts, supplyImages, type CommerceState, type Member, type SupplyProduct } from "./commerce";
 import { CommerceError } from "./commerce-store";
 import { emptyDesignBrief, type Product } from "./studio";
@@ -10,6 +11,7 @@ export function supplyProjectId(memberId:string,requestId:unknown){
 }
 
 export function supplyForProject(state:CommerceState,member:Member,id:string):SupplyProduct{
+  if(!approvedAccess(member))throw new CommerceError("운영자 승인 후 상세페이지를 제작할 수 있습니다.",403);
   const supply=state.products.find(product=>product.id===id)||sampleProducts.find(product=>product.id===id);
   if(!supply)throw new CommerceError("공급 상품을 찾을 수 없습니다.",404);
   if(member.role==="admin")return supply;

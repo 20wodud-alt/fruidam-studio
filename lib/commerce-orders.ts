@@ -2,7 +2,7 @@ import { randomUUID } from "node:crypto";
 import { canOrder, type CommerceState, type Member, type SupplyOrder } from "./commerce";
 import { CommerceError } from "./commerce-store";
 export function createPendingOrder(state:CommerceState,actor:Member,input:Record<string,unknown>):SupplyOrder{
-  if(actor.role!=="seller")throw new CommerceError("셀러 계정에서 발주해주세요.",403);
+  if(actor.role!=="seller"||!actor.approved)throw new CommerceError("셀러 계정에서 발주해주세요.",403);
   const product=state.products.find(p=>p.id===input.productId&&p.status==="approved");if(!product||!canOrder(actor,product.id))throw new CommerceError("상품 발주 권한을 확인해주세요.",403);
   const option=product.options.find(o=>o.id===input.optionId),quantity=Number(input.quantity);
   if(!Number.isSafeInteger(quantity)||quantity<1||quantity>1000||!option||option.stock<quantity)throw new CommerceError("출고 가능 수량을 확인해주세요.");

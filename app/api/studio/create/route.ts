@@ -1,3 +1,4 @@
+import { withApiAccess } from "@/lib/api-access";
 import { randomUUID } from "node:crypto";
 import { product } from "@/lib/validate-product";
 import { generateSections } from "@/lib/studio";
@@ -9,7 +10,7 @@ import type { GenerationEvent } from "@/lib/generation-progress";
 import { currentMember } from "@/lib/commerce-auth";
 export const runtime="nodejs";
 export const maxDuration=120;
-export async function POST(request:Request){
+async function handlePOST(request:Request){
   const origin=request.headers.get("origin");if(origin && new URL(origin).host!==request.headers.get("host"))return Response.json({error:"앱에서 요청해주세요."},{status:403});
   const member=await currentMember();if(member&&member.role!=="admin")return Response.json({error:"공급상품 목록에서 상품을 선택해 상세페이지를 시작해주세요."},{status:403});
   let input;try{input=await request.json();}catch{return Response.json({error:"상품 요청 형식을 확인해주세요."},{status:400});}
@@ -41,3 +42,5 @@ export async function POST(request:Request){
   });
   return new Response(stream,{headers:{"Content-Type":"application/x-ndjson; charset=utf-8","Cache-Control":"no-store","X-Accel-Buffering":"no"}});
 }
+
+export const POST=withApiAccess(handlePOST);

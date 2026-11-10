@@ -3,13 +3,13 @@ import path from "node:path";
 import { randomUUID } from "node:crypto";
 import { demoProduct, generateSections, type StudioProject } from "./studio";
 import { storageProvider, supabaseStudioAccess } from "./supabase-storage";
-import { currentMember } from "./commerce-auth";
+import { requireApprovedMember } from "./api-access";
 import { CommerceError } from "./commerce-store";
 const directory = path.join(process.cwd(), "data");
 const file = path.join(directory, "studio.json");
 const singleton = globalThis as typeof globalThis & { studioQueue?: Promise<unknown> };
 export async function studioAccess(update?: (projects: StudioProject[]) => void): Promise<StudioProject[]> {
-  const member = await currentMember();
+  const member = await requireApprovedMember();
   const allowed = member && member.role !== "admin" ? new Set(member.projects) : null;
   const scopedUpdate = !update ? undefined : (all: StudioProject[]) => {
     if (!allowed) { update(all); return; }

@@ -1,3 +1,4 @@
+import { withApiAccess } from "@/lib/api-access";
 import { textEditScope } from "@/lib/text-edit-scope";
 import { validateEditorMetrics } from "@/lib/editor-metrics";
 import { hasEditorChanges } from "@/lib/editor-result";
@@ -11,7 +12,7 @@ import { readAISettings } from "@/lib/ai-settings";
 import type { StudioProject } from "@/lib/studio";
 export const runtime = "nodejs";
 export const maxDuration = 120;
-export async function POST(request: Request) {
+async function handlePOST(request: Request) {
   try {
     if (request.headers.get("origin") && new URL(request.headers.get("origin")!).host !== request.headers.get("host")) return NextResponse.json({ error: "Invalid origin" }, { status: 403 });
     const input = await request.json();
@@ -41,3 +42,5 @@ export async function POST(request: Request) {
     return NextResponse.json({ ...result, project, attachmentsUsed:attachments.length>0, mode: settings.apiKey && settings.enabled ? "gemini" : "local" });
   } catch (e) { return NextResponse.json({ error: e instanceof Error ? (e.name === "TimeoutError" ? "AI 응답 시간이 길어졌어요. 다시 시도해주세요." : e.message) : "요청을 처리하지 못했어요." }, { status: 400 }); }
 }
+
+export const POST=withApiAccess(handlePOST);

@@ -1,3 +1,4 @@
+import { withApiAccess } from "@/lib/api-access";
 import { rememberGeneratedPhoto } from "@/lib/photo-library";
 import { NextResponse } from "next/server";
 import { studioAccess } from "@/lib/studio-store";
@@ -10,7 +11,7 @@ import { commerceAccess, CommerceError } from "@/lib/commerce-store";
 export const runtime="nodejs";
 export const maxDuration=150;
 const active=new Set<string>();
-export async function POST(request:Request){
+async function handlePOST(request:Request){
   let id="";let acquired=false;
   try{
     const origin=request.headers.get("origin");if(origin && new URL(origin).host!==request.headers.get("host"))return NextResponse.json({error:"이 앱의 편집 화면에서 요청해주세요."},{status:403});
@@ -28,3 +29,5 @@ export async function POST(request:Request){
     return NextResponse.json(result);
   }catch(e){return NextResponse.json({error:e instanceof Error ? e.name==="TimeoutError" ? "이미지 생성 시간이 길어졌어요. 원본을 유지했습니다. 다시 시도해주세요." : e.name==="AbortError" ? "이미지 생성 요청이 중단됐어요." : e.message : "이미지를 생성하지 못했어요."},{status:400});}finally{if(acquired)active.delete(id);}
 }
+
+export const POST=withApiAccess(handlePOST);

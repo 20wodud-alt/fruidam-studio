@@ -1,9 +1,10 @@
+import { withApiAccess } from "@/lib/api-access";
 import { NextResponse } from "next/server";
 import { randomUUID } from "node:crypto";
 import { writeAsset } from "@/lib/asset-store";
 import sharp from "sharp";
 export const runtime = "nodejs";
-export async function POST(request: Request) {
+async function handlePOST(request: Request) {
   try {
     if (Number(request.headers.get("content-length")) > 9 * 1024 * 1024) return NextResponse.json({ error: "사진은 한 장에 8MB 이하로 올려주세요." }, { status: 413 });
     const data = await request.formData(); const file = data.get("file");
@@ -18,3 +19,5 @@ export async function POST(request: Request) {
     return NextResponse.json({ url: `/api/uploads/${name}` });
   } catch { return NextResponse.json({ error: "사진을 처리하지 못했어요. 다른 이미지로 시도해주세요." }, { status: 400 }); }
 }
+
+export const POST=withApiAccess(handlePOST);

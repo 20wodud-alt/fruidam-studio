@@ -1,3 +1,4 @@
+import { approvedAccess, publicProduct } from "@/lib/member-access";
 import { randomUUID } from "node:crypto";
 import { NextResponse } from "next/server";
 import { currentMember, requireMember, sameOrigin } from "@/lib/commerce-auth";
@@ -23,8 +24,9 @@ function ownedOrder(state:CommerceState,id:string,member:Member){const order=sta
 function snapshot(state:CommerceState,member:Member|null){
   const members=member?.role==="admin"?state.members:[];
   const operatorEmail=member?.role==="admin"?(process.env.FRUIDAM_ADMIN_NOTIFICATION_EMAIL||process.env.FRUIDAM_OWNER_EMAIL||"").trim().toLowerCase():undefined;
-  const products=state.products.filter(p=>p.status==="approved" || member?.role==="admin" || p.supplierId===member?.id).map(p=>member && (subscribed(member)||member.unlocked.length>0||member.credits>0||member.role!=="seller")?p:{...p,options:p.options.map(o=>({...o,price:0}))});
-  return {member,products,samples:sampleProducts,members,operatorEmail,orders:member?state.orders.filter(o=>member.role==="admin"||o.sellerId===member.id||o.supplierId===member.id).map(o=>member.role==="seller"||member.role==="admin"?o:{...o,sellerId:""}):[],claims:member?state.claims.filter(c=>member.role==="admin"||c.sellerId===member.id||c.supplierId===member.id):[],notices:member?state.notices.filter(n=>n.memberId===member.id).slice(0,100):[],purchases:member?state.purchases.filter(p=>p.memberId===member.id):[],paymentReady:false,notificationReady:{email:false,kakao:false,sms:false}};
+  const permitted=approvedAccess(member);
+  const products=state.products.filter(p=>p.status==="approved" || member?.role==="admin" || p.supplierId===member?.id).map(p=>permitted?p:publicProduct(p));
+  return {member,products,samples:permitted?sampleProducts:sampleProducts.map(publicProduct),members,operatorEmail,orders:permitted&&member?state.orders.filter(o=>member.role==="admin"||o.sellerId===member.id||o.supplierId===member.id).map(o=>member.role==="seller"||member.role==="admin"?o:{...o,sellerId:""}):[],claims:permitted&&member?state.claims.filter(c=>member.role==="admin"||c.sellerId===member.id||c.supplierId===member.id):[],notices:member?state.notices.filter(n=>n.memberId===member.id).slice(0,100):[],purchases:permitted&&member?state.purchases.filter(p=>p.memberId===member.id):[],paymentReady:false,notificationReady:{email:false,kakao:false,sms:false}};
 }
 export async function GET(){try{const member=await currentMember();return NextResponse.json(snapshot(await commerceAccess(),member),{headers:{"Cache-Control":"no-store"}});}catch(error){return failure(error);}}
 function failure(error:unknown){return NextResponse.json({error:error instanceof CommerceError?error.message:"서비스 요청을 처리하지 못했습니다. 다시 확인해주세요."},{status:error instanceof CommerceError?error.status:503});}
@@ -32,6 +34,7 @@ export async function POST(request:Request){
   try{
     sameOrigin(request);if(Number(request.headers.get("content-length")||0)>200000)throw new CommerceError("입력 데이터가 너무 큽니다.",413);
     const input=await request.json();const member=await requireMember();
+    if(!approvedAccess(member)&&input.action!=="readNotices")throw new CommerceError("운영자 승인 완료 후 이용해주세요.",403);
     if(input.action==="createProject"){
       const state=await commerceAccess();const fresh=state.members.find(m=>m.id===member.id)!;
       const supply=supplyForProject(state,fresh,text(input.productId));
@@ -55,6 +58,7 @@ export async function POST(request:Request){
     }
     const state=await commerceAccess(s=>{
       const actor=s.members.find(m=>m.id===member.id)!;
+      if(!approvedAccess(actor)&&input.action!=="readNotices")throw new CommerceError("운영자 승인 완료 후 이용해주세요.",403);
       if(input.action==="supplierProduct"){
         if(actor.role!=="admin" && (actor.role!=="supplier" || !actor.approved))throw new CommerceError("입점 승인 후 상품을 등록할 수 있습니다.",403);
         const id=text(input.id)||randomUUID();const existing=s.products.find(p=>p.id===id);
@@ -76,6 +80,10 @@ export async function POST(request:Request){
         if(existing){s.products[s.products.indexOf(existing)]=next;for(const m of s.members)if(m.unlocked.includes(id)||m.projects.some(p=>s.projectProducts[p]===id))notice(s,m.id,"공급 조건 변경",next.status==="pending"?`${name}의 공급 조건이 변경되어 검수 중입니다. 최신 내용을 확인해주세요.`:`${name}의 공급 조건이 변경되었습니다. 최신 내용을 확인해주세요.`);}else s.products.unshift(next);
       }else if(input.action==="updateSupplierApplication"){
         updateSupplierApplication(s,actor.id,input);
+      }else if(input.action==="approveSeller"||input.action==="revokeSellerApproval"){
+        if(actor.role!=="admin")throw new CommerceError("운영자만 회원 승인을 관리할 수 있습니다.",403);
+        const target=s.members.find(m=>m.id===text(input.id)&&m.role==="seller");if(!target)throw new CommerceError("셀러 회원을 찾을 수 없습니다.",404);
+        target.approved=input.action==="approveSeller";notice(s,target.id,target.approved?"셀러 회원 승인이 완료됐습니다.":"셀러 회원 승인이 취소됐습니다.",target.approved?"상품 상세·가격 확인과 스튜디오를 이용할 수 있습니다.":"운영자 확인 후 다시 이용해주세요.");
       }else if(input.action==="approveSupplier"){
         if(actor.role!=="admin")throw new CommerceError("운영자만 처리할 수 있습니다.",403);
         const target=s.members.find(m=>m.id===input.id&&m.role==="supplier");if(!target)throw new CommerceError("공급처를 찾지 못했습니다.");target.approved=true;target.commission=number(input.commission,0,10000);notice(s,target.id,"입점 승인 완료","상품을 등록하고 검수를 요청할 수 있습니다.");

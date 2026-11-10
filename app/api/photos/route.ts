@@ -1,8 +1,9 @@
+import { withApiAccess } from "@/lib/api-access";
 import {readPhotoLibrary} from "@/lib/photo-library";
 import {studioAccess} from "@/lib/studio-store";
 export const runtime="nodejs";
 export const dynamic="force-dynamic";
-export async function GET(request:Request){
+async function handleGET(request:Request){
   const projectId=new URL(request.url).searchParams.get("projectId");
   if(!projectId)return Response.json({error:"편집 중인 상세페이지를 지정해주세요."},{status:400});
   try{
@@ -12,3 +13,5 @@ export async function GET(request:Request){
   }
   catch{return Response.json({error:"보관한 사진을 불러오지 못했어요."},{status:500});}
 }
+
+export const GET=withApiAccess(handleGET);

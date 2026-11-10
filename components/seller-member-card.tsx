@@ -1,0 +1,4 @@
+import type { Member } from "@/lib/commerce";
+export function SellerMemberCard({member,busy,act}:{member:Member;busy:boolean;act:(payload:Record<string,unknown>,message?:string)=>Promise<unknown>}){
+  return <article className="fd-panel"><div className="fd-between"><div><h3>{member.name}</h3><p>{member.email}</p></div><span className={`fd-status ${member.approved?"approved":"pending"}`}>{member.approved?"회원 승인 완료":"승인 대기"}</span></div><p className="fd-caption">이메일 인증 후 가입한 셀러입니다. 승인하면 상품 상세·가격·상세페이지 스튜디오를 이용할 수 있습니다.</p><button className={`fd-button small ${member.approved?"outline":""}`} disabled={busy} onClick={()=>{if(member.approved&&!window.confirm(`${member.name}님의 회원 승인을 취소할까요? 상품 상세·가격·스튜디오 접근이 중단됩니다.`))return;void act({action:member.approved?"revokeSellerApproval":"approveSeller",id:member.id},member.approved?"회원 승인을 취소했습니다.":"셀러 회원을 승인했습니다.");}}>{member.approved?"회원 승인 취소":"회원 승인"}</button></article>;
+}

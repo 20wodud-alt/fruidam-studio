@@ -1,3 +1,4 @@
+import { withApiAccess } from "@/lib/api-access";
 import { NextResponse } from "next/server";
 import { readAISettings } from "@/lib/ai-settings";
 import { auditWithGemini } from "@/lib/copy-audit-ai";
@@ -9,7 +10,7 @@ import { validateElements, validateSectionFormat } from "@/lib/validate-element-
 export const runtime = "nodejs";
 export const maxDuration = 120;
 
-export async function POST(request: Request) {
+async function handlePOST(request: Request) {
   try {
     const origin = request.headers.get("origin");
     if (origin && new URL(origin).host !== request.headers.get("host")) return NextResponse.json({ error: "Invalid origin" }, { status: 403 });
@@ -49,3 +50,5 @@ export async function POST(request: Request) {
     return new Response(stream, { headers: { "Content-Type": "application/x-ndjson", "Cache-Control": "no-store" } });
   } catch (e) { return NextResponse.json({ error: e instanceof Error ? e.message : "검수를 시작하지 못했어요." }, { status: 400 }); }
 }
+
+export const POST=withApiAccess(handlePOST);

@@ -1,3 +1,4 @@
+import { withApiAccess } from "@/lib/api-access";
 import { composeCopy } from "@/lib/ai-copywriter";
 import { sameOrigin } from "@/lib/commerce-auth";
 import { fruitCompositionRequest } from "@/lib/fruit-composition";
@@ -6,7 +7,7 @@ import { studioAccess } from "@/lib/studio-store";
 import { backupStudioProject } from "@/lib/asset-store";
 export const runtime="nodejs";
 export const maxDuration=120;
-export async function POST(request:Request){
+async function handlePOST(request:Request){
   try{
     sameOrigin(request);
     const input=await request.json();
@@ -18,3 +19,5 @@ export async function POST(request:Request){
     return Response.json({project:{...project,product,sections:generated.sections,copyReport:generated.report}},{headers:{"Cache-Control":"no-store"}});
   }catch(error){return Response.json({error:error instanceof Error?error.message:"구성안을 다듬지 못했어요. 기존 작업은 유지됩니다."},{status:400});}
 }
+
+export const POST=withApiAccess(handlePOST);

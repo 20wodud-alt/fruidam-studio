@@ -1,12 +1,13 @@
+import { requireApprovedMember, withApiAccess } from "@/lib/api-access";
 import { createHash } from "node:crypto";
-import { currentMember, sameOrigin } from "@/lib/commerce-auth";
+import { sameOrigin } from "@/lib/commerce-auth";
 import { commerceAccess, CommerceError } from "@/lib/commerce-store";
 import { studioAccess } from "@/lib/studio-store";
 export const runtime="nodejs";
-export async function POST(request:Request){try{
-  sameOrigin(request);const input=await request.json();const member=await currentMember();
-  // The existing owner-only studio remains behind Vercel Authentication.
-  if(!member||member.role==="admin")return Response.json({ok:true,legacy:true});
+async function handlePOST(request:Request){try{
+  sameOrigin(request);const input=await request.json();const member=await requireApprovedMember();
+  // Administrator downloads do not consume seller credits; access is guarded above.
+  if(member?.role==="admin")return Response.json({ok:true,legacy:true});
   if(!member.projects.includes(input.projectId))throw new CommerceError("작업 접근 권한이 없습니다.",403);
   const project=(await studioAccess()).find(p=>p.id===input.projectId);if(!project)throw new CommerceError("작업을 찾지 못했습니다.",404);
   const fingerprint=createHash("sha256").update(JSON.stringify({product:project.product,sections:project.sections})).digest("hex");
@@ -21,3 +22,5 @@ export async function POST(request:Request){try{
   if(input.mode==="commit")await commerceAccess(validate);else validate(await commerceAccess());
   return Response.json({ok:true});
 }catch(error){return Response.json({error:error instanceof CommerceError?error.message:"내보내기 권한을 확인하지 못했습니다."},{status:error instanceof CommerceError?error.status:503});}}
+
+export const POST=withApiAccess(handlePOST);

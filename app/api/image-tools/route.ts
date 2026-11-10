@@ -1,3 +1,4 @@
+import { withApiAccess } from "@/lib/api-access";
 import { readAsset, writeAsset } from "@/lib/asset-store";
 import { promises as fs } from "node:fs";
 import path from "node:path";
@@ -8,7 +9,7 @@ import { sampleImageFile } from "@/lib/sample-photos";
 export const runtime = "nodejs";
 
 // Local image processing only. User paths and remote URLs are never accepted.
-export async function POST(request: Request) {
+async function handlePOST(request: Request) {
   try {
     if (Number(request.headers.get("content-length")) > 4096) throw new Error("input");
     const input = await request.json();
@@ -66,3 +67,5 @@ export async function POST(request: Request) {
     return Response.json({ url: `/api/uploads/${name}` });
   } catch { return Response.json({ error: "사진을 처리하지 못했어요. 이미지와 편집 범위를 확인해주세요." }, { status: 400 }); }
 }
+
+export const POST=withApiAccess(handlePOST);

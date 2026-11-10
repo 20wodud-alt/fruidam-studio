@@ -2,7 +2,7 @@
 
 Production: https://fruidam-studio.vercel.app (Vercel login required).
 
-Project: fruidam-studio. Runtime: Node.js 24. Function region: icn1 (Seoul). Keep All Deployments Vercel Authentication enabled because the app has no separate user authentication.
+Project: fruidam-studio. Runtime: Node.js 24. Function region: icn1 (Seoul). Latest policy (2026-11-10): Supabase Auth and server-side member approval now protect private APIs and studio access. Use prod_deployment_urls_and_all_previews to keep generated deployment URLs and previews protected, while allowing the production domain to show public basic pages. Do not disable protection for historical deployments.
 
 ## Deploy again
 
