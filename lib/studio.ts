@@ -33,21 +33,21 @@ export function generateSections(product: Product): Section[] {
   const photo = (index: number) => product.images.length ? product.images[index % product.images.length] : "";
   const feature = (index: number) => lines[index] || "이 부분에 소개할 상품의 특징을 추가해주세요.";
   const specs: Omit<Section, "id" | "visible">[] = [
-    { kind: "hero", title: product.name, body: lines[0] || "당신의 일상에 새로운 즐거움을 더하세요.", image: product.images[0] || "" },
-    { kind: "story", title: "좋은 선택의 시작", body: `${product.name}에 담긴 이야기를 만나보세요.\n${feature(0)}`, image: photo(1) },
-    { kind: "benefits", title: "이런 점이 특별해요", body: lines.join("\n") || "상품의 특별한 장점을 입력해주세요.", image: "" },
-    { kind: "detail", title: "포인트 01 · 처음 만나는 매력", body: feature(0), image: photo(0) },
-    { kind: "detail", title: "포인트 02 · 선택을 만드는 디테일", body: feature(1), image: photo(1) },
-    { kind: "detail", title: "포인트 03 · 더 알아보고 싶은 이유", body: feature(2), image: photo(2) },
-    { kind: "detail", title: "포인트 04 · 마지막까지 살펴보세요", body: feature(3), image: photo(3) },
-    { kind: "story", title: "사진으로 만나는 상품 이야기", body: `${product.name}의 모습과 구성을 사진으로 확인해보세요.`, image: photo(1) },
-    { kind: "detail", title: "가까이에서 보는 상품", body: "사진에서 실제 상품의 형태와 세부 모습을 살펴보세요.", image: photo(2) },
-    { kind: "benefits", title: "선택 전, 한 번 더 확인하세요", body: lines.slice(0, 4).join("\n") || "확인할 상품 정보를 추가해주세요.", image: "" },
-    { kind: "options", title: "나에게 맞는 구성을 골라보세요", body: product.options || "기본 구성\n상세 옵션은 판매자에게 문의해주세요.", image: "" },
-    { kind: "detail", title: "구성품을 살펴보세요", body: product.options || "구성품과 수량을 확인할 수 있도록 내용을 추가해주세요.", image: photo(0) },
-    { kind: "story", title: "상품을 더 잘 알아가는 방법", body: "상품의 사용 방법이나 보관 시 알아둘 내용을 추가해주세요.", image: "" },
-    { kind: "faq", title: "구매 전, 궁금한 점이 있나요?", body: "Q. 옵션은 어디서 선택하나요?\n구매 페이지에서 원하는 옵션을 선택해주세요.\n\nQ. 상품에 대해 더 궁금한 점이 있어요.\n구매하신 판매처의 고객센터로 문의해주세요.", image: "" },
-    { kind: "story", title: "일상에 더하는 좋은 선택", body: `${product.name}\n${lines[0] || "상품을 소개할 마무리 문구를 추가해주세요."}`, image: photo(0) },
+    { kind: "hero", kicker: "산지직송 제철 과일", title: product.name, body: lines[0] || `${product.name}, 지금 가장 신선한 구성으로 만나보세요.`, image: product.images[0] || "" },
+    { kind: "benefits", kicker: "핵심 스펙 요약", title: "한눈에 보는\n선택의 이유", body: lines.slice(0, 4).join("\n") || "상품의 주요 특징을 입력해주세요.", image: "" },
+    { kind: "story", kicker: "고민 해결", title: "매번 실패하던 과일,\n이제 기준을 바꾸세요", body: `겉만 보고 고르기 어려웠던 과일.\n${feature(0)}`, image: photo(1) },
+    { kind: "detail", kicker: "POINT 01", title: "입안 가득 퍼지는\n기분 좋은 풍미", body: feature(0), image: photo(0) },
+    { kind: "detail", kicker: "POINT 02", title: "하나씩 살펴 고른\n까다로운 선별 기준", body: feature(1), image: photo(1) },
+    { kind: "detail", kicker: "POINT 03", title: "우리 집 식탁부터\n마음 전할 자리까지", body: feature(2), image: photo(2) },
+    { kind: "detail", kicker: "DETAIL CUT", title: "가까이 볼수록\n또렷한 원물의 상태", body: feature(3) || "실제 과일의 색과 형태, 표면을 사진으로 확인하세요.", image: photo(3) },
+    { kind: "story", kicker: "DAILY TABLE", title: "매일 꺼내 먹기 좋은\n부담 없는 과일 시간", body: `${product.name} 하나로 달라지는 하루 간식.\n가족과 함께 나누기 좋은 구성을 확인하세요.`, image: photo(1) },
+    { kind: "shipping", kicker: "포장 및 배송 안내", title: "받는 순간까지 안전하게,\n꼼꼼한 완충 포장", body: "이동 중 흔들림과 눌림을 줄이는 포장으로 준비합니다.\n수령 직후 박스 내 상품 상태를 먼저 확인해주세요.", image: photo(2) },
+    { kind: "benefits", kicker: "CHECK POINT", title: "장바구니 담기 전,\n꼭 확인하세요", body: lines.slice(0, 4).join("\n") || "구매 전 확인이 필요한 특징을 추가해주세요.", image: "" },
+    { kind: "options", kicker: "OPTION GUIDE", title: "용도와 인원에 맞게\n딱 맞는 구성을 고르세요", body: product.options || "기본 구성\n상세 옵션은 구매 선택창을 확인해주세요.", image: "" },
+    { kind: "detail", kicker: "SPEC CHECK", title: "받아보실 구성과\n중량을 확인하세요", body: product.options || "선택한 옵션에 따른 중량 및 구성을 확인해주세요.", image: photo(0) },
+    { kind: "story", kicker: "STORAGE TIP", title: "마지막 한 개까지\n신선하게 즐기는 법", body: "수령 후 통풍이 잘되는 서늘한 곳에 두거나,\n냉장 보관으로 신선도를 유지하세요.", image: photo(2) },
+    { kind: "faq", kicker: "Q & A", title: "구매 전 자주 묻는 질문,\n미리 확인하세요", body: "Q. 어떤 옵션과 구성이 있나요?\nA. 용도와 인원에 맞춰 가정용/선물용 등 선택 가능한 옵션을 비교해보세요.\n\nQ. 받아볼 때 크기나 모양이 다 똑같나요?\nA. 농산물은 생물 특성상 개당 크기와 모양에 약간의 차이가 있을 수 있습니다.\n\nQ. 보관은 어떻게 하는 것이 좋나요?\nA. 수령 후 직사광선을 피해 서늘한 곳에 두시거나 냉장 보관해 주세요.\n\nQ. 배송 중 파손이나 이상이 있으면 어떻게 하나요?\nA. 수령 직후 상품 상태를 사진으로 찍어 고객센터로 문의해 주시면 빠르게 안내해 드립니다.", image: "" },
+    { kind: "story", kicker: "BUYING GUIDE", title: `산지에서 식탁까지,\n${product.name}의 약속`, body: `${feature(0)}\n선별부터 안전 포장까지 꼼꼼하게 준비했습니다. 지금 알맞은 옵션을 선택해보세요.`, image: photo(0) },
   ];
   if (product.length === "25") {
     const extra: Omit<Section, "id" | "visible">[] = [

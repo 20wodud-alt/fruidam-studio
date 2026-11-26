@@ -30,6 +30,78 @@ ${brandCoverStyles}
 .product-page .dp-curve-line{display:inline-block;white-space:nowrap;line-height:1.3}
 .product-page sup{font-size:.7em;line-height:0;vertical-align:super}
 
+/* Coupang high-CTR layout rhythm & mobile readability (scoped to preserve custom skins & canvas modes) */
+.product-page .dp-section:not([data-skin]):not(.dp-canvas-blank):not(.dp-canvas-photo) h2{font-size:44px;line-height:1.32;letter-spacing:-1.6px;font-weight:800;margin:0 0 22px}
+.product-page .dp-section:not([data-skin]):not(.dp-canvas-blank):not(.dp-canvas-photo)>.dp-kicker{display:inline-block;font-size:15px;font-weight:700;letter-spacing:1.2px;color:var(--accent);background:var(--light);padding:6px 20px;border-radius:999px;margin-bottom:22px}
+.product-page .dp-section:not([data-skin]):not(.dp-canvas-blank):not(.dp-canvas-photo) .dp-body{font-size:21px;color:#3d423c;line-height:1.72;max-width:680px}
+.product-page .dp-section:not([data-skin]):not(.dp-canvas-blank):not(.dp-canvas-photo).dp-hero{padding-top:48px;background:linear-gradient(180deg,var(--light) 0%,#ffffff 58%)}
+.product-page .dp-section:not([data-skin]):not(.dp-canvas-blank):not(.dp-canvas-photo).dp-hero .dp-topline{margin:0 56px 40px;border-bottom:2px solid var(--light);padding-bottom:14px;font-size:15px;font-weight:700}
+.product-page .dp-section:not([data-skin]):not(.dp-canvas-blank):not(.dp-canvas-photo).dp-hero h2{font-size:68px;line-height:1.2;max-width:740px;margin:16px auto 22px;letter-spacing:-2.8px}
+.product-page .dp-section:not([data-skin]):not(.dp-canvas-blank):not(.dp-canvas-photo).dp-hero .dp-body{font-size:22px;color:#2c312b !important;font-weight:500;margin-bottom:28px;padding:0 48px}
+.product-page .dp-section:not([data-skin]):not(.dp-canvas-blank):not(.dp-canvas-photo).dp-hero .dp-image{height:700px}
+.product-page .dp-section:not([data-skin]):not(.dp-canvas-blank):not(.dp-canvas-photo).dp-hero .dp-hero-foot{padding:20px 24px;font-size:18px;font-weight:700;letter-spacing:.5px}
+.product-page .dp-section:not([data-skin]):not(.dp-canvas-blank):not(.dp-canvas-photo).dp-detail-split-left,
+.product-page .dp-section:not([data-skin]):not(.dp-canvas-blank):not(.dp-canvas-photo).dp-detail-split-right,
+.product-page .dp-section:not([data-skin]):not(.dp-canvas-blank):not(.dp-canvas-photo).dp-story-note{padding:76px 56px;text-align:left;background:#fff}
+.product-page .dp-section:not([data-skin]):not(.dp-canvas-blank):not(.dp-canvas-photo).dp-detail-split-right{background:var(--light)}
+.product-page .dp-split-wrap{display:grid;grid-template-columns:1.05fr .95fr;gap:36px;align-items:center}
+.product-page .dp-detail-split-right .dp-split-wrap{grid-template-columns:.95fr 1.05fr}
+.product-page .dp-detail-split-right .dp-split-media{order:2}
+.product-page .dp-split-wrap .dp-image{width:100% !important;height:420px !important;border-radius:16px;margin-top:0 !important}
+.product-page .dp-split-text h2,.product-page .dp-split-text .dp-body{padding-inline:0 !important;text-align:left !important;margin:0;max-width:none}.product-page .dp-split-text .dp-kicker{margin-left:0 !important}
+.product-page .dp-section:not([data-skin]):not(.dp-canvas-blank):not(.dp-canvas-photo).dp-detail-compare{padding:84px 56px;background:var(--light)}
+.product-page .dp-compare-grid{display:grid;grid-template-columns:1fr 1fr;gap:20px;margin-top:32px;text-align:left}
+.product-page .dp-compare-col{border-radius:16px;padding:28px;background:#fff;border:1.5px solid #e2dfd7}
+.product-page .dp-compare-col.is-best{border:2.5px solid var(--accent);box-shadow:0 10px 28px rgba(0,0,0,.06)}
+.product-page .dp-compare-head{font-size:20px;font-weight:800;padding-bottom:14px;margin-bottom:16px;border-bottom:1.5px solid #eee;color:#6f736d}
+.product-page .dp-compare-col.is-best .dp-compare-head{color:var(--accent);border-bottom-color:var(--light)}
+.product-page .dp-compare-col ul{margin:0;padding-left:20px}
+.product-page .dp-compare-col li{font-size:19px;line-height:1.65;margin-bottom:10px;color:#292c29}
+.product-page .dp-section:not([data-skin]):not(.dp-canvas-blank):not(.dp-canvas-photo).dp-detail-macro{padding:84px 0 0;background:#1f2420;color:#fff}
+.product-page .dp-detail-macro h2{color:#fff !important;padding:0 56px}
+.product-page .dp-detail-macro .dp-body{color:#d8ddd7 !important;padding:0 56px}
+.product-page .dp-detail-macro .dp-image{height:640px;margin-top:40px}
+.product-page .dp-section:not([data-skin]):not(.dp-canvas-blank):not(.dp-canvas-photo).dp-story-timeline{padding:84px 56px;background:#fff;text-align:left}
+.product-page .dp-timeline-list{display:flex;flex-direction:column;gap:16px;margin-top:32px}
+.product-page .dp-step-item{display:grid;grid-template-columns:120px 1fr;gap:20px;align-items:center;background:var(--light);padding:24px 28px;border-radius:14px;border-left:5px solid var(--accent)}
+.product-page .dp-step-num{font-size:18px;font-weight:800;color:var(--accent);font-variant-numeric:tabular-nums}
+.product-page .dp-step-item p{font-size:21px;line-height:1.6;color:#292c29;font-weight:500}
+.product-page .dp-section:not([data-skin]):not(.dp-canvas-blank):not(.dp-canvas-photo).dp-options{padding:88px 56px;background:var(--light)}
+.product-page .dp-option-grid{display:grid;grid-template-columns:1fr 1fr;gap:20px;margin-top:32px}
+.product-page .dp-option-grid .dp-option{flex-direction:column;align-items:flex-start;gap:12px;margin:0;padding:30px;border-radius:16px;border:2px solid #e2dfd7;background:#fff}
+.product-page .dp-option-grid .dp-option:nth-child(2){border-color:var(--accent)}
+.product-page .dp-option-grid .dp-option>span{flex:0 0 auto !important;width:auto;height:auto;display:inline-block;background:var(--accent);color:#fff;font-size:13px;font-weight:800;letter-spacing:.5px;padding:6px 14px;border-radius:8px;margin-bottom:4px}
+.product-page .dp-price-banner{margin-top:28px;padding:24px 32px;border-radius:16px;background:var(--accent);color:#fff;display:flex;justify-content:space-between;align-items:center}
+.product-page .dp-price-banner span{font-size:18px;font-weight:700}
+.product-page .dp-price-banner .dp-price{color:#fff;font-size:36px;margin:0}
+.product-page .dp-section:not([data-skin]):not(.dp-canvas-blank):not(.dp-canvas-photo).dp-shipping{padding:80px 56px;background:#f7f8f6;text-align:left}
+.product-page .dp-shipping-steps{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-top:28px}
+.product-page .dp-shipping-steps .dp-step-item{grid-template-columns:1fr;gap:8px;background:#fff;border:1.5px solid #e2dfd7;border-left:5px solid var(--accent)}
+.product-page .dp-section:not([data-skin]):not(.dp-canvas-blank):not(.dp-canvas-photo).dp-faq{padding:80px 56px;background:#fff;text-align:left}
+.product-page .dp-faq-list{display:flex;flex-direction:column;gap:18px;margin-top:28px}
+.product-page .dp-faq-card{border-radius:16px;overflow:hidden;border:1.5px solid #e5e3dc}
+.product-page .dp-faq-q{display:flex;align-items:center;gap:14px;padding:22px 26px;background:var(--light);font-size:21px;font-weight:700;color:#20251f}
+.product-page .dp-faq-a{display:flex;align-items:flex-start;gap:14px;padding:22px 26px;background:#fff;font-size:20px;line-height:1.65;color:#3d423c}
+.product-page .dp-qa-badge{flex:0 0 36px;height:36px;border-radius:50%;display:inline-flex;align-items:center;justify-content:center;font-weight:800;font-size:17px}
+.product-page .dp-qa-badge.is-q{background:var(--accent);color:#fff}
+.product-page .dp-qa-badge.is-a{background:#e8ebe6;color:#292c29}
+.product-page .dp-guarantee-bar{margin-top:28px;padding:20px 28px;border-radius:12px;border:2px dashed var(--accent);background:var(--light);color:var(--accent);font-size:19px;font-weight:800;text-align:center}
+.product-page .dp-hero-badges{display:flex;justify-content:center;gap:14px;margin:0 auto 34px;padding:0 40px;flex-wrap:wrap}
+.product-page .dp-hero-badge{display:inline-flex;align-items:center;gap:8px;border-radius:999px;border:1.5px solid var(--accent);background:#fff;color:#20251f;font-weight:700;font-size:16px;padding:10px 22px;box-shadow:0 4px 12px rgba(0,0,0,.05)}
+.product-page .dp-hero-badge small{display:inline-flex;align-items:center;justify-content:center;width:22px;height:22px;border-radius:50%;background:var(--accent);color:#fff;font-size:11px;font-weight:800}
+.product-page .dp-section:not([data-skin]):not(.dp-canvas-blank):not(.dp-canvas-photo).dp-benefits{padding:84px 56px;background:var(--accent);color:#fff}
+.product-page .dp-section:not([data-skin]):not(.dp-canvas-blank):not(.dp-canvas-photo).dp-benefits>.dp-kicker{background:rgba(255,255,255,.18);color:#fff}
+.product-page .dp-section:not([data-skin]):not(.dp-canvas-blank):not(.dp-canvas-photo).dp-benefits h2{color:#fff !important}.product-page .dp-benefits .dp-heading-emphasis,.product-page .dp-detail-macro .dp-heading-emphasis{background:none !important;padding:0 !important}
+.product-page .dp-section:not([data-skin]):not(.dp-canvas-blank):not(.dp-canvas-photo).dp-benefits .dp-points{grid-template-columns:1fr;gap:16px;margin-top:34px}
+.product-page .dp-section:not([data-skin]):not(.dp-canvas-blank):not(.dp-canvas-photo).dp-benefits .dp-point{background:#fff;color:#20251f;border-radius:14px;padding:26px 30px;min-height:0;display:grid;grid-template-columns:110px 1fr;gap:20px;align-items:center;border:0;box-shadow:0 8px 24px rgba(0,0,0,.12)}
+.product-page .dp-section:not([data-skin]):not(.dp-canvas-blank):not(.dp-canvas-photo).dp-benefits .dp-point b{margin:0;background:var(--light);color:var(--accent);padding:10px 12px;border-radius:10px;text-align:center;font-size:14px;letter-spacing:1px}
+.product-page .dp-section:not([data-skin]):not(.dp-canvas-blank):not(.dp-canvas-photo).dp-benefits .dp-point p{font-size:20px;line-height:1.55;font-weight:600;color:#20251f}
+.product-page .dp-policy-box{margin-top:28px;border-radius:16px;background:#f9f6f3;border:1.5px solid #e6dfd8;padding:34px 36px;text-align:left}
+.product-page .dp-policy-pill{display:inline-block;background:var(--accent);color:#fff;font-size:16px;font-weight:800;padding:8px 24px;border-radius:999px;margin-bottom:22px}
+.product-page .dp-policy-group{margin-top:16px}
+.product-page .dp-policy-group strong{display:block;font-size:19px;color:#20251f;margin-bottom:8px}
+.product-page .dp-policy-group ul{margin:0;padding-left:18px;color:#4a4e48;font-size:16px;line-height:1.75}
+
 `;
 export function DetailPage({ includeBrandCover = true, project, selected, onSelect, selectedElement, selectedElements, onSelectElement, onEditText, onInsertPage, onResizePage, onDeletePage }: { includeBrandCover?: boolean; project: StudioProject; selected?: string; onSelect?: (id: string) => void; selectedElement?: string; selectedElements?: string[]; onDeletePage?:(id:string)=>void; onInsertPage?:(afterId:string,kind:InsertPageKind)=>void; onResizePage?:(id:string,height:number)=>void; onEditText?: (sectionId:string,target:string)=>void; onSelectElement?: (sectionId: string, elementId: string) => void }) {
   const { product, sections } = project; const theme = themes[product.theme];
@@ -39,7 +111,7 @@ export function DetailPage({ includeBrandCover = true, project, selected, onSele
   }
   function image(section: Section) {
     const attributes = target(section, "image");
-    return section.image ? <><img {...attributes} className={`dp-image ${attributes.className || ""}`} style={photoCSS(section.format?.image)} src={section.image} alt={section.title || product.name} />{project.supplyProductId && section.imageMeta && !section.format?.image?.hidden && <figcaption>AI 연출 이미지 · 실제 상품 사진을 함께 확인해주세요</figcaption>}{!section.imageMeta && (section.image.startsWith("/sample-") || section.image.startsWith("/fruit-") || section.image.startsWith("/photos/fruit-")) && !section.format?.image?.hidden && <figcaption>샘플 과일 사진 · 판매 상품 사진으로 교체해주세요</figcaption>}</> : <div {...attributes} className={`dp-no-image ${attributes.className || ""}`} style={photoCSS(section.format?.image)}>상품 사진을 추가해주세요</div>;
+    const resolvedImage = section.image || (product.images.length && (section.kind === "story" || section.kind === "detail" || section.kind === "shipping") ? product.images[sections.indexOf(section) % product.images.length] : ""); return resolvedImage ? <><img {...attributes} className={`dp-image ${attributes.className || ""}`} style={photoCSS(section.format?.image)} src={resolvedImage} alt={section.title || product.name} />{project.supplyProductId && section.imageMeta && !section.format?.image?.hidden && <figcaption>AI 연출 이미지 · 실제 상품 사진을 함께 확인해주세요</figcaption>}{!section.imageMeta && (section.image.startsWith("/sample-") || section.image.startsWith("/fruit-") || section.image.startsWith("/photos/fruit-")) && !section.format?.image?.hidden && <figcaption>샘플 과일 사진 · 판매 상품 사진으로 교체해주세요</figcaption>}</> : <div {...attributes} className={`dp-no-image ${attributes.className || ""}`} style={photoCSS(section.format?.image)}>상품 사진을 추가해주세요</div>;
   }
   function extras(section: Section) {
     if (!section.elements?.length) return null;
@@ -55,18 +127,74 @@ export function DetailPage({ includeBrandCover = true, project, selected, onSele
   return <div className={`product-page layout-${product.design?.layout || "editorial"}`} style={{ "--accent": theme.accent, "--light": theme.light } as React.CSSProperties}>
     {includeBrandCover && project.supplyProductId && <BrandCover/>}
       {onInsertPage && <PageBoundary afterId="" index={0} disabled={sections.length>=30} onInsert={onInsertPage}/>}
-    {sections.filter(s => s.visible).map(section => {
-      const titleAttributes = target(section, "title"), bodyAttributes = target(section, "body"), kickerAttributes = target(section, "kicker");
-      const heading = <h2 {...titleAttributes} style={textCSS(section.format?.title)}>{section.presentation === "fruit-editorial" && section.kind !== "hero" ? section.title.split("\n").map((line,i,lines)=><span className="dp-heading-line" key={i}>{i===lines.length-1 ? <span className="dp-heading-emphasis"><TextContent text={line} format={section.format?.title}/></span> : <TextContent text={line} format={section.format?.title}/>}</span>) : <TextContent text={section.title} format={section.format?.title}/>}</h2>;
-      const kicker = <p {...kickerAttributes} className={`dp-kicker ${kickerAttributes.className || ""}`} style={textCSS(section.format?.kicker)}>{<TextContent text={section.kicker ?? defaultKickers[section.kind]} format={section.format?.kicker}/>}</p>;
-      const body = <p {...bodyAttributes} className={`dp-body ${bodyAttributes.className || ""}`} style={textCSS(section.format?.body)}><TextContent text={section.body} format={section.format?.body}/></p>;
-      return <Fragment key={section.id}><section data-section={section.id} data-skin={section.format?.skin} className={`dp-section dp-${section.kind} ${section.canvasMode ? `dp-canvas-${section.canvasMode}` : ""} ${section.presentation || ""} ${selected === section.id && (!onSelectElement || !selectedElement || selectedElement === "section") ? "selected" : ""}`} style={{ minHeight:section.format?.minHeight, background: section.format?.background, paddingTop: section.format?.padding, paddingBottom: section.format?.padding }} role={onSelect && !onSelectElement ? "button" : undefined} tabIndex={onSelect && !onSelectElement ? 0 : undefined} aria-label={onSelect && !onSelectElement ? `${section.title} 섹션 선택` : undefined} onKeyDown={onSelect && !onSelectElement ? e => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); onSelect(section.id); } } : undefined} onClick={() => onSelectElement ? onSelectElement(section.id, "section") : onSelect?.(section.id)}>
-        {section.canvasMode ? <>{section.kicker?.trim() && kicker}{section.title.trim() && heading}{section.body.trim() && body}{extras(section)}{(section.image || section.canvasMode==="photo") && image(section)}</> : section.kind === "hero" ? <><div className="dp-topline"><span>{product.category}</span><span>일상에 더하는 좋은 선택</span></div>{kicker}{heading}{body}{extras(section)}{image(section)}<div className="dp-hero-foot">{product.name} · 당신을 위한 특별한 제안</div></> : <>{kicker}{heading}
-          {section.kind === "benefits" ? <div {...bodyAttributes} data-count={section.body.split("\n").filter(line => line.trim()).length} className={`dp-points ${bodyAttributes.className || ""}`} style={{...textCSS(section.format?.body), display: section.format?.body?.hidden ? "none" : undefined }}>{section.body.split("\n").map(line => line.trim()).filter(Boolean).map((line, i) => <div className="dp-point" key={i}><b>POINT {String(i + 1).padStart(2, "0")}</b><p style={textCSS({...section.format?.body,offsetX:undefined,offsetY:undefined,widthPx:undefined,rotation:undefined,opacity:undefined,zIndex:undefined})}><TextContent text={line} format={{...section.format?.body,listStyle:"none",superscript:section.format?.body?.superscript}}/></p></div>)}</div> : section.kind === "options" ? <><div {...bodyAttributes} className={bodyAttributes.className || ""} style={{...textCSS(section.format?.body), display: section.format?.body?.hidden ? "none" : undefined }}>{section.body.split("\n").map(line => line.trim()).filter(Boolean).map((line, i) => <div key={i} className="dp-option"><span>OPTION {String(i + 1).padStart(2, "0")}</span><p style={textCSS({...section.format?.body,offsetX:undefined,offsetY:undefined,widthPx:undefined,rotation:undefined,opacity:undefined,zIndex:undefined})}><TextContent text={line} format={{...section.format?.body,listStyle:"none",superscript:section.format?.body?.superscript}}/></p></div>)}</div>{product.price && <p className="dp-price">{product.price}</p>}</> : body}
-          {extras(section)}{section.image && image(section)}
-        </>}
-        {onResizePage && selected===section.id && <PageResizeHandle id={section.id} onResize={onResizePage}/>}
-      </section>{onInsertPage && <PageBoundary afterId={section.id} index={sections.indexOf(section)+1} onDelete={onDeletePage} canDelete={sections.filter(s=>s.visible).length>1} disabled={sections.length>=30} onInsert={onInsertPage}/>}</Fragment>;
-    })}<div className="dp-footer">{product.name} · THANK YOU FOR YOUR CHOICE</div>
+    {(() => {
+      let detailIdx = 0;
+      let storyIdx = 0;
+      return sections.filter(s => s.visible).map(section => {
+        const titleAttributes = target(section, "title"), bodyAttributes = target(section, "body"), kickerAttributes = target(section, "kicker");
+        const useCoupangRhythm = !section.canvasMode && !section.format?.skin;
+        let variantClass = "";
+        if (useCoupangRhythm) {
+          if (section.kind === "detail") variantClass = ["dp-detail-split-left", "dp-detail-compare", "dp-detail-split-right", "dp-detail-macro"][detailIdx++ % 4];
+          else if (section.kind === "story") variantClass = ["dp-story-banner", "dp-story-timeline", "dp-story-note"][storyIdx++ % 3];
+        }
+        const heading = <h2 {...titleAttributes} style={textCSS(section.format?.title)}>{section.presentation === "fruit-editorial" && section.kind !== "hero" ? section.title.split("\n").map((line,i,lines)=><span className="dp-heading-line" key={i}>{i===lines.length-1 ? <span className="dp-heading-emphasis"><TextContent text={line} format={section.format?.title}/></span> : <TextContent text={line} format={section.format?.title}/>}</span>) : <TextContent text={section.title} format={section.format?.title}/>}</h2>;
+        const kicker = <p {...kickerAttributes} className={`dp-kicker ${kickerAttributes.className || ""}`} style={textCSS(section.format?.kicker)}>{<TextContent text={section.kicker ?? defaultKickers[section.kind]} format={section.format?.kicker}/>}</p>;
+        const body = <p {...bodyAttributes} className={`dp-body ${bodyAttributes.className || ""}`} style={textCSS(section.format?.body)}><TextContent text={section.body} format={section.format?.body}/></p>;
+        const renderStepList = (stepClass: string, prefix = "STEP") => {
+          const lines = section.body.split("\n").map(l => l.trim()).filter(Boolean);
+          return <div {...bodyAttributes} className={`${stepClass} ${bodyAttributes.className || ""}`} style={{ ...textCSS(section.format?.body), display: section.format?.body?.hidden ? "none" : undefined }}>
+            {(lines.length ? lines : [section.body]).map((line, i) => <div className="dp-step-item" key={i}><span className="dp-step-num">{prefix} {String(i + 1).padStart(2, "0")}</span><p><TextContent text={line} format={{ ...section.format?.body, listStyle: "none", offsetX: undefined, offsetY: undefined, widthPx: undefined, rotation: undefined, opacity: undefined, zIndex: undefined }} /></p></div>)}
+          </div>;
+        };
+        const renderCompareCards = () => {
+          const lines = section.body.split("\n").map(l => l.trim()).filter(Boolean);
+          const mid = Math.ceil(lines.length / 2);
+          const normalLines = lines.slice(0, mid);
+          const bestLines = lines.slice(mid);
+          return <div {...bodyAttributes} className={`dp-compare-grid ${bodyAttributes.className || ""}`} style={{ ...textCSS(section.format?.body), display: section.format?.body?.hidden ? "none" : undefined }}>
+            <div className="dp-compare-col is-normal"><div className="dp-compare-head">일반 유통 과일</div><ul>{(normalLines.length ? normalLines : ["크기·상태 편차가 큼"]).map((t, i) => <li key={i}>{t}</li>)}</ul></div>
+            <div className="dp-compare-col is-best"><div className="dp-compare-head">{product.name || "산지 직송 선별"}</div><ul>{(bestLines.length ? bestLines : [section.body]).map((t, i) => <li key={i}>{t}</li>)}</ul></div>
+          </div>;
+        };
+        const renderFaqCards = () => {
+          const rawLines = section.body.split(/\r?\n/).map(l => l.trim()).filter(Boolean);
+          const qaItems: { q: string; a: string[] }[] = [];
+          for (const line of rawLines) {
+            if (/^Q[.\s:]/i.test(line) || qaItems.length === 0) {
+              const clean = line.replace(/^Q[.\s:]*/i, "");
+              const qMark = clean.indexOf("?");
+              if (qMark !== -1 && qMark < clean.length - 1) {
+                qaItems.push({ q: clean.slice(0, qMark + 1).trim(), a: [clean.slice(qMark + 1).replace(/^A[.\s:]*/i, "").trim()] });
+              } else {
+                qaItems.push({ q: clean, a: [] });
+              }
+            } else {
+              qaItems[qaItems.length - 1].a.push(line.replace(/^A[.\s:]*/i, ""));
+            }
+          }
+          return <div {...bodyAttributes} className={`dp-faq-list ${bodyAttributes.className || ""}`} style={{ ...textCSS(section.format?.body), display: section.format?.body?.hidden ? "none" : undefined }}>
+            {qaItems.map((item, i) => <div className="dp-faq-card" key={i}><div className="dp-faq-q"><span className="dp-qa-badge is-q">Q</span><p>{item.q}</p></div>{item.a.length > 0 && <div className="dp-faq-a"><span className="dp-qa-badge is-a">A</span><p>{item.a.join("\n")}</p></div>}</div>)}
+          </div>;
+        };
+        const isSplit = variantClass === "dp-detail-split-left" || variantClass === "dp-detail-split-right" || variantClass === "dp-story-note";
+        return <Fragment key={section.id}><section data-section={section.id} data-skin={section.format?.skin} className={`dp-section dp-${section.kind} ${variantClass} ${section.canvasMode ? `dp-canvas-${section.canvasMode}` : ""} ${section.presentation || ""} ${selected === section.id && (!onSelectElement || !selectedElement || selectedElement === "section") ? "selected" : ""}`} style={{ minHeight:section.format?.minHeight, background: useCoupangRhythm && section.format?.background === "#ffffff" ? undefined : section.format?.background, paddingTop: section.format?.padding, paddingBottom: section.format?.padding }} role={onSelect && !onSelectElement ? "button" : undefined} tabIndex={onSelect && !onSelectElement ? 0 : undefined} aria-label={onSelect && !onSelectElement ? `${section.title} 섹션 선택` : undefined} onKeyDown={onSelect && !onSelectElement ? e => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); onSelect(section.id); } } : undefined} onClick={() => onSelectElement ? onSelectElement(section.id, "section") : onSelect?.(section.id)}>
+          {section.canvasMode ? <>{section.kicker?.trim() && kicker}{section.title.trim() && heading}{section.body.trim() && body}{extras(section)}{(section.image || section.canvasMode==="photo") && image(section)}</>
+          : section.kind === "hero" ? <><div className="dp-topline"><span>{product.category}</span><span>산지 직송 · 꼼꼼한 선별</span></div>{kicker}{heading}{body}<div className="dp-hero-badges"><div className="dp-hero-badge"><small>01</small>산지 직송</div><div className="dp-hero-badge"><small>02</small>엄격 선별</div><div className="dp-hero-badge"><small>03</small>안전 포장</div></div>{extras(section)}{image(section)}<div className="dp-hero-foot">{product.name} · 지금 가장 신선한 구성</div></>
+          : isSplit ? <div className="dp-split-wrap"><div className="dp-split-media">{image(section)}</div><div className="dp-split-text">{kicker}{heading}{body}{extras(section)}</div></div>
+          : <>{kicker}{heading}
+            {section.kind === "benefits" ? (() => { const rawPts = section.body.split("\n").map(line => line.trim()).filter(Boolean); const extraPts = [`${product.name}의 신선한 원물 컨디션을 확인하세요.`, "하나씩 살펴 고른 꼼꼼한 선별 기준", "가정용부터 선물용까지 알맞은 구성 선택", "안전한 완충 포장으로 문 앞까지 배송"]; const pts = rawPts.length >= 4 ? rawPts : [...rawPts, ...extraPts.slice(rawPts.length, 4)]; return <div {...bodyAttributes} data-count={pts.length} className={`dp-points ${bodyAttributes.className || ""}`} style={{...textCSS(section.format?.body), display: section.format?.body?.hidden ? "none" : undefined }}>{pts.map((line, i) => <div className="dp-point" key={i}><b>POINT {String(i + 1).padStart(2, "0")}</b><p style={textCSS({...section.format?.body,offsetX:undefined,offsetY:undefined,widthPx:undefined,rotation:undefined,opacity:undefined,zIndex:undefined})}><TextContent text={line} format={{...section.format?.body,listStyle:"none",superscript:section.format?.body?.superscript}}/></p></div>)}</div>; })()
+            : section.kind === "options" ? <><div {...bodyAttributes} className={`${useCoupangRhythm ? "dp-option-grid" : ""} ${bodyAttributes.className || ""}`} style={{...textCSS(section.format?.body), display: section.format?.body?.hidden ? "none" : undefined }}>{section.body.split("\n").map(line => line.trim()).filter(Boolean).map((line, i) => <div key={i} className="dp-option"><span>OPTION {String(i + 1).padStart(2, "0")}</span><p style={textCSS({...section.format?.body,offsetX:undefined,offsetY:undefined,widthPx:undefined,rotation:undefined,opacity:undefined,zIndex:undefined})}><TextContent text={line} format={{...section.format?.body,listStyle:"none",superscript:section.format?.body?.superscript}}/></p></div>)}</div>{product.price && (useCoupangRhythm ? <div className="dp-price-banner"><span>선택 가능 기준가</span><p className="dp-price">{product.price}</p></div> : <p className="dp-price">{product.price}</p>)}</>
+            : variantClass === "dp-detail-compare" ? renderCompareCards()
+            : variantClass === "dp-story-timeline" ? renderStepList("dp-timeline-list", "STEP")
+            : useCoupangRhythm && section.kind === "shipping" ? renderStepList("dp-shipping-steps", "CHECK")
+            : useCoupangRhythm && section.kind === "faq" ? <>{renderFaqCards()}<div className="dp-guarantee-bar">수령 직후 상품 상태를 확인하시고, 이상 시 사진과 함께 문의해주세요</div><div className="dp-policy-box"><span className="dp-policy-pill">교환 · 반품 · 취소 안내</span><div className="dp-policy-group"><strong>교환 / 반품이 가능한 경우</strong><ul><li>상품의 불량, 파손, 오배송이 확인된 경우 수령 후 사진 촬영과 함께 고객센터로 접수해 주세요.</li><li>임의로 폐기하여 사진 확인이 불가할 경우 처리가 어려울 수 있습니다.</li></ul></div><div className="dp-policy-group"><strong>교환 / 반품이 어려운 경우</strong><ul><li>신선식품 특성상 고객의 단순 변심 또는 주관적 기호(크기·색상·개당 편차 등)에 의한 경우</li><li>수취인 정보 오기재, 장기 부재, 보관 방법 미준수로 상품 가치가 훼손된 경우</li></ul></div></div></>
+            : body}
+            {extras(section)}{(section.image || (product.images.length && (section.kind === "story" || section.kind === "detail" || section.kind === "shipping"))) && image(section)}
+          </>}
+          {onResizePage && selected===section.id && <PageResizeHandle id={section.id} onResize={onResizePage}/>}
+        </section>{onInsertPage && <PageBoundary afterId={section.id} index={sections.indexOf(section)+1} onDelete={onDeletePage} canDelete={sections.filter(s=>s.visible).length>1} disabled={sections.length>=30} onInsert={onInsertPage}/>}</Fragment>;
+      });
+    })()}<div className="dp-footer">{product.name} · THANK YOU FOR YOUR CHOICE</div>
   </div>;
 }

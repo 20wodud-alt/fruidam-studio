@@ -1,28 +1,23 @@
 .logo {
   position: relative;
-  display: inline-block;
+  display: inline-flex;
+  align-items: center;
   flex-shrink: 0;
-  width: 89.6px;
-  aspect-ratio: 1311 / 641;
-  overflow: hidden;
+  width: 152px;
+  aspect-ratio: 861 / 213;
   vertical-align: middle;
 }
 
-/* Display the artwork bounds while retaining the original transparent PNG. */
 .image {
-  position: absolute;
   display: block;
-  left: -18.4592%;
-  top: -24.025%;
-  width: 135.3166%;
-  height: 138.3775%;
-  max-width: none;
-  object-fit: fill;
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
 }
 
-.compact { width: 71.4px; }
+.compact { width: 124px; }
 
 @media (max-width: 600px) {
-  .logo { width: 72.8px; }
-  .compact { width: 64.4px; }
+  .logo { width: 124px; }
+  .compact { width: 108px; }
 }

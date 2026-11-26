@@ -7,7 +7,7 @@ import type { Member } from "@/lib/commerce";
 import "@/app/commerce.css";
 
 const links = [
-  ["/about", "열매담 이야기"], ["/catalog", "공급상품 둘러보기"],
+  ["/about", "산지록 이야기"], ["/catalog", "공급상품 둘러보기"],
   ["/studio", "상세페이지 스튜디오"], ["/pricing", "요금제"], ["/supplier", "농가·직매장 입점"],
 ];
 
